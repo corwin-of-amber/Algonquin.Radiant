@@ -1,0 +1,10 @@
+{
+    "name": "algonquin.radiant",
+    "description": "Prime Radiant: Algonquin's Logical Assistant UI",
+    "main": "build/kremlin/index.html",
+    "repository": {},
+    "dependencies": {
+        "katex": "^0.13.0",
+        "vue": "^2.6.12"
+    }
+}
