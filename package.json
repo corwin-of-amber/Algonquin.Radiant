@@ -4,6 +4,7 @@
     "main": "build/kremlin/index.html",
     "repository": {},
     "dependencies": {
+        "ejson": "^2.2.1",
         "katex": "^0.13.0",
         "nanoid": "^3.1.22",
         "safe-buffer": "^5.2.1",
