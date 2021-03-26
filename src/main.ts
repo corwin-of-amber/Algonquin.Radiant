@@ -3,6 +3,11 @@ import Vue from 'vue';
 import whiteboard from './components/whiteboard.vue';
 import './main.css';
 
+import { DocumentActions as A } from './model';
+
+import { Buffer } from 'safe-buffer';
+Object.assign(window, {Buffer});
+
 
 function main() {
     var app = new Vue(whiteboard) as whiteboard;
@@ -12,6 +17,12 @@ function main() {
         ]
     };
     app.$mount('div#app');
+
+    app.$on('action', (loc: A.ActionLocator, action: A.Action) => {
+        A.applyAction(loc, action);
+    });
+
+    Object.assign(window, {app});
 }
 
 window.addEventListener('load', main);

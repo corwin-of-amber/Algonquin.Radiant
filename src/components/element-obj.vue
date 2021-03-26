@@ -1,7 +1,7 @@
 <template>
     <foreignObject :x="elem.at.x" :y="elem.at.y"
         :class="dragClasses"
-        @mousedown="dragStart" @mouseup="dragEnd">
+        @mousedown.stop="onMouseDown" @mouseup="dragEnd" @contextmenu.prevent.stop>
         <slot/>
     </foreignObject>
 </template>
@@ -26,6 +26,10 @@ export default Vue.extend({
         }
     },
     methods: {
+        onMouseDown(ev: MouseEvent) {
+            if (ev.button == 2) this.$emit('action', {type: 'menu', ev});
+            else this.dragStart(ev);
+        },
         dragStart(ev: MouseEvent) {
             this.dragState = {c: 'move'};
             document.addEventListener('mouseup', ev => this.dragEnd(ev), {once: true});
