@@ -4,6 +4,9 @@
     "main": "build/kremlin/index.html",
     "repository": {},
     "dependencies": {
+        "@codemirror/basic-setup": "^0.18.0",
+        "@codemirror/state": "^0.18.3",
+        "@codemirror/view": "^0.18.3",
         "ejson": "^2.2.1",
         "katex": "^0.13.0",
         "nanoid": "^3.1.22",

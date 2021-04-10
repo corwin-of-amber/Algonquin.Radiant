@@ -15,9 +15,14 @@ import 'katex/dist/katex.css';
 export default Vue.extend({
     props: ['tex'],
     mounted() {
-        katex.render(this.tex, this.$el, {
-            throwOnError: false
-        });
+        this.$watch('tex', () => this.refresh(), {immediate: true});
+    },
+    methods: {
+        refresh() {
+            katex.render(this.tex, this.$el, {
+                throwOnError: false
+            });
+        }
     }
 });
 </script>

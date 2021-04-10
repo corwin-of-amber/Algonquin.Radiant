@@ -2,14 +2,55 @@ html { height: 100%; }
 * { box-sizing: border-box; }
 
 body {
-    background-color: #eef;
     height: 100%;
     margin: 0;
-    padding: 9px;
+    border: 4px solid #deb887;
 }
 
 body > .whiteboard {
     width: 100%;
     height: 100%;
     background-color: #fff;
+}
+
+.whiteboard .drag-move > * {
+    background-color: #6f00ff20;;
+}
+
+.whiteboard g.connector line.shape {
+    stroke: black;
+    stroke-width: 1px;
+}
+
+.whiteboard g.connector:hover line.shape {
+    stroke-width: 2px;
+}
+
+.whiteboard g.connector line.hover {
+    stroke: #0000;
+    stroke-width: 12px;
+}
+.whiteboard g.connector:hover line.hover {
+    stroke-width: 16px;
+}
+.whiteboard g.connector.drag-move line.hover {
+    stroke: #6f00ff20;
+}
+
+.whiteboard g.connector circle.endpoint {
+    opacity: 0;
+    r: 3px;
+    stroke: #888;
+    stroke-width: 1px;
+    fill: #cfe;
+}
+
+.whiteboard g.connector:hover circle.endpoint,
+.whiteboard g.connector.drag-move circle.endpoint {
+    opacity: 0.9;
+}
+
+.whiteboard g.connector:hover circle.endpoint:hover,
+.whiteboard g.connector.drag-move circle.endpoint:hover {
+    r: 5px;
 }
