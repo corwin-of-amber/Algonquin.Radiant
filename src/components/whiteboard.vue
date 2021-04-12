@@ -44,7 +44,8 @@ svg .drag-move > line.hover {
 <script lang="ts">
 import Vue from 'vue';
 import WhiteboardContextMenu from './whiteboard-context-menu.vue';
-import { DocumentModel as M, DocumentActions as A, Point2D } from '../model';
+import { DocumentModel as M, DocumentActions as A } from '../model';
+import { Point2D } from '../geom';
 
 import obj from './element-obj.vue';
 import conj from './conjecture-katex.vue';
@@ -78,14 +79,27 @@ export default Vue.extend({
         menuAction(ev: {type: string, for: MenuContext}) {
             switch (ev.type) {
             case 'new-conj':  this.menuNewConj(ev.for);  break;
+            case 'new-conn':  this.menuNewConn(ev.for);  break;
             case 'cut':
             case 'delete':    this.menuDelete(ev.for);   break;
+            case 'duplicate': this.menuDuplicate(ev.for); break;
+            case 'inspect':   this.menuInspect(ev.for);  break;
             }
         },
         menuNewConj(ctx: MenuContext) {
             var newElem = {
+                type: 'conjecture',
                 id: this.model.mkId(),
                 at: ctx.at, tex: "xyz"
+            } as M.Element;
+            this.$emit('action', {doc: this.model},
+                                 {type: 'create', newElem});
+        },
+        menuNewConn(ctx: MenuContext) {
+            var newElem = {
+                type: 'connector',
+                id: this.model.mkId(),
+                at: [ctx.at, Point2D.add(ctx.at, CONNECTOR_INIT_VEC)]
             } as M.Element;
             this.$emit('action', {doc: this.model},
                                  {type: 'create', newElem});
@@ -93,6 +107,24 @@ export default Vue.extend({
         menuDelete(ctx: MenuContext) {
             this.$emit('action', {doc: this.model, elem: ctx.elem},
                                  {type: 'delete'});
+        },
+        menuDuplicate(ctx: MenuContext) {
+            var shift = (p: Point2D) => Point2D.add(p, DUPLICATE_OFFSET),
+                at = ctx.elem.at;
+            at = Array.isArray(at) ? at.map(shift) : shift(at);
+            var newElem = {...ctx.elem,
+                id: this.model.mkId(), at
+            } as M.Element;
+            this.$emit('action', {doc: this.model},
+                                 {type: 'create', newElem});
+        },
+        menuInspect(ctx: MenuContext) {
+            var at = ctx.at || ctx.elem.at as Point2D;
+            var newElem = {
+                id: this.model.mkId(),
+                at: Point2D.add(at, INSPECTOR_OFFSET), for: ctx.elem.id
+            };
+            this.$emit('action', {doc: this.model}, {type: 'create', newElem})
         },
 
         onMouseDown(ev: MouseEvent) {
@@ -108,4 +140,8 @@ export default Vue.extend({
 });
 
 type MenuContext = {elem?: M.Element, at?: Point2D};
+
+const CONNECTOR_INIT_VEC = {x: 30, y: 30},
+      INSPECTOR_OFFSET = {x: 40, y: -20},
+      DUPLICATE_OFFSET = {x: -30, y: 30};
 </script>

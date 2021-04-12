@@ -1,12 +1,15 @@
 <template>
     <context-menu ref="m" @action="$emit('action', $event)">
-        <item name="new-conj">New conjecture</item>
+        <item name="new-conj">New Conjecture</item>
+        <item name="new-conn">New Connector</item>
         <hr/>
         <item name="cut">Cut</item>
-        <item>Copy</item>
-        <item>Paste</item>
-        <item>Duplicate</item>
+        <item name="copy" :enabled="false">Copy</item>
+        <item name="paste" :enabled="false">Paste</item>
+        <item name="duplicate">Duplicate</item>
         <item name="delete">Delete</item>
+        <hr/>
+        <item name="inspect">Show Inspector...</item>
     </context-menu>
 </template>
 
@@ -15,7 +18,7 @@ import Vue from 'vue'
 import ContextMenu from './context-menu/context-menu.vue';
 import Item from './context-menu/context-menu-item.vue';
 
-import { Point2D } from '../model';
+import { Point2D } from '../geom';
 
 export default Vue.extend({
     methods: {

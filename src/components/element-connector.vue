@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { Point2D } from '../model';
+import { Point2D } from '../geom';
 import { DragBuddy } from './drag';
 
 

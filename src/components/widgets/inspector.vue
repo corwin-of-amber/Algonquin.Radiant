@@ -1,6 +1,6 @@
 <template>
-    <div class="sattelite-inspector">
-        <div ref="editor-container" @mousedown.stop v-once/>
+    <div class="sattelite-inspector" @mousedown="onMouseGuard">
+        <div ref="editor-container" v-once/>
     </div>
 </template>
 
@@ -10,6 +10,8 @@ div.sattelite-inspector {
     border: 1px solid #888;
     border-radius: 6px;
     padding: 6px;
+    background: #fff8;
+    backdrop-filter: blur(2px);
 }
 div.sattelite-inspector .cm-focused {
     outline: none !important;
@@ -49,6 +51,13 @@ export default Vue.extend({
                     attrValue: state.sliceDoc()
                 });
             }
+        },
+        onMouseGuard(ev: MouseEvent) {
+            var el = ev.target as HTMLElement;
+            if (el.closest('.cm-line'))
+                ev.stopPropagation();  // allow selection in editor text area
+            else
+                ev.preventDefault(); // keep editor focused, if it was
         }
     }
 });

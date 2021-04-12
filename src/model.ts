@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { Point2D } from './geom';
 
 
 namespace DocumentModel {
@@ -34,6 +35,10 @@ namespace DocumentModel {
 
     export type Id = string
 
+    export function isWidget(e: Element): e is Widget {
+        return !!(<Widget>e).for;
+    }
+
 }
 
 namespace DocumentActions {
@@ -43,7 +48,7 @@ namespace DocumentActions {
     }
 
     export type ActionType = 'select' | 'move' | 'create' | 'delete' | 
-        'edit-attr' | 'menu';
+        'edit-attr' | 'menu' | 'inspect';
 
     export interface SelectAction extends Action {
         type: 'select'
@@ -103,13 +108,15 @@ namespace DocumentActions {
     }
 
     function applyCreate(loc: ActionLocator, action: CreateAction) {
-        loc.doc.elements.push(action.newElem);
+        var l = M.isWidget(action.newElem) ? loc.doc.widgets : loc.doc.elements;
+        l.push(action.newElem);
     }
 
     function applyDelete(loc: ActionLocator, action: DeleteAction) {
-        var i = loc.doc.elements.indexOf(loc.elem);
+        var l = M.isWidget(loc.elem) ? loc.doc.widgets : loc.doc.elements,
+            i = l.indexOf(loc.elem);
         if (i >= 0)
-            loc.doc.elements.splice(i, 1);
+            l.splice(i, 1);
     }
 
     function applyEditAttr<T>(loc: ActionLocator, action: EditAttributeAction<T>) {
@@ -119,7 +126,4 @@ namespace DocumentActions {
 }
 
 
-type Point2D = {x: number, y: number};
-
-
-export { DocumentModel, DocumentActions, Point2D }
+export { DocumentModel, DocumentActions }
