@@ -37,12 +37,13 @@ function main() {
 
     var lex;
     var lvl1 = {
-            lex: lex = new PickLexer({'[': '\\[', ']': '\\]', '{': '{', '}': '}'}),
+            lex: lex = new PickLexer({'[': '\\[', ']': '\\]', '{': '{', '}': '}', '(': '\\(', ')': '\\)'}),
             pars: new SpiralParser(Object.assign(new Grammar([
                 new Rule('E', []), new Rule('E', ['P', 'E']),
-                new Rule('P', ['P1']), new Rule('P', ['P2']),
-                new Rule('P1', [{type: '['}, 'E', {type: ']'}]),
-                new Rule('P2', [{type: '{'}, 'E', {type: '}'}])
+                new Rule('P', ['[]']), new Rule('P', ['{}']), new Rule('P', ['()']),
+                new Rule('[]', [{type: '['}, 'E', {type: ']'}]),
+                new Rule('{}', [{type: '{'}, 'E', {type: '}'}]),
+                new Rule('()', [{type: '('}, 'E', {type: ')'}])
             ]), {Rigid: ['E']}), {lexer: new PassThroughLexer(lex)})
         },
         lvl2 = {
@@ -62,7 +63,7 @@ function main() {
             console.log(pars.parse([el.tex]));
         }
     }*/
-    var ast1 = lvl1.pars.parse(["s_0[R^*]s", ", s[R]s', kw, ni=n_0i",  "\\vdash n(i) <_0 u"]);
+    var ast1 = lvl1.pars.parse(["s_0[R^*]s", ", s[R]s', ni=n_0i",  "\\vdash n'u=n_0u, u <_0 i'"]);
     console.log(ast1);
     var ast2 = lvl2.pars.parse(ast1.children.map(x => x.text || {type: x.type, value: <any>x}));
     console.log(ast2);
