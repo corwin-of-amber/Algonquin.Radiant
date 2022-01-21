@@ -8,33 +8,63 @@ import whiteboard from './components/whiteboard.vue';
 import './main.css';
 
 import { DocumentModel as M, DocumentActions as A } from './model';
-import { LocalStore } from './store';
+import { FileStore, LocalStore, StoreBase } from './store';
 
 import { PickLexer, PassThroughLexer } from './syntax/lexer';
 import { SpiralParser } from './syntax/parser';
 
 
-var l = new LocalStore('document');
+class App {
+    store = new LocalStore('document');
+    view: whiteboard;
 
+    constructor(container = 'div#app') {
+        this.view = new Vue(whiteboard) as whiteboard;
+        this.view.model = this.restore();
+        this.view.$mount(container);
+
+        this.view.$on('action', (loc: A.ActionLocator, action: A.Action) => {
+            A.applyAction(loc, action);
+            this.store.save(this.view.model);
+        });    
+    }
+
+    restore() {
+        var model = this.store.load() || this._mkdoc();
+        return model;
+    }
+
+    new() {
+        this.view.model = this._mkdoc();
+    }
+
+    save(filename?: string) {
+        var s: StoreBase = filename ? new FileStore(filename, this.store.ser)
+                                    : this.store;
+        s.save(this.view.model);
+    }
+
+    open(filename: string) {
+        this.view.model = new FileStore(filename, this.store.ser).load();
+    }
+
+    _mkdoc() {
+        return new M.Document();
+    }
+}
 
 function main() {
-    var model = l.load() || {};
-    model.elements ??= [
-        {id: '1', at: {x: 25, y: 25}, tex: "c = \\pm\\sqrt{a^2 + b^2}"}
-    ];
-    model = Object.assign(new M.Document(), model);
+    var app = new App();
 
-    var app = new Vue(whiteboard) as whiteboard;
-    app.model = model;
-    app.$mount('div#app');
+    Object.assign(window, {app});
+}
 
-    app.$on('action', (loc: A.ActionLocator, action: A.Action) => {
-        A.applyAction(loc, action);
-        l.save(app.model);
-    });
 
-    Object.assign(window, {app, l});
-
+/**
+ * This is an experiment in defining a flexible syntax similar to Coq's
+ * notation mechanism.
+ */
+function wip_flexiparse() {
     var lex;
     var lvl1 = {
             lex: lex = new PickLexer({'[': '\\[', ']': '\\]', '{': '{', '}': '}', '(': '\\(', ')': '\\)'}),
@@ -72,5 +102,7 @@ function main() {
     //console.log(lvl2.pars.parse(["s_0", "s, s", "s' \\vdash n(i)"]));
     //console.log(pars.parse(['s_0[R^*]s', {type: 'K', value: '0'}, 's[R]s\'']));
 }
+
+
 
 window.addEventListener('load', main);

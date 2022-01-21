@@ -1,6 +1,7 @@
 {
     "name": "algonquin.radiant",
     "description": "Prime Radiant: Algonquin's Logical Assistant UI",
+    "version": "0.1.0",
     "main": "build/kremlin/index.html",
     "repository": {},
     "dependencies": {
@@ -18,5 +19,10 @@
     "devDependencies": {
         "@types/nearley": "^2.11.1",
         "@types/node": "^14.14.37"
+    },
+    "kremlin": {
+        "ignore": [
+            "data"
+        ]
     }
 }

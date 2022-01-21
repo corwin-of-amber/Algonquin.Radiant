@@ -18,6 +18,17 @@ namespace DocumentModel {
         findId(id: Id) {
             return this.elements.find(x => x.id === id)
         }
+
+        static from(props: Document.Props) {
+            var d = new Document();
+            d.elements = props.elements;
+            d.widgets = props.widgets;
+            return d;
+        }
+    }
+
+    export namespace Document {
+        export type Props = {elements: Element[], widgets: Widget[]};
     }
 
     export interface Element {
