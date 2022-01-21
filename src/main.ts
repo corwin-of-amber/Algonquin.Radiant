@@ -28,7 +28,7 @@ class App {
 
     restore() {
         var model = this.store.load() || this._mkdoc();
-        return model;
+        return M.Document.promote(model);
     }
 
     new() {

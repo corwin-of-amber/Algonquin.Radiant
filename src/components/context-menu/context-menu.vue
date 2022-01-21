@@ -1,30 +1,28 @@
 <template>
-    <vue-context-menu ref="m" @click.native="action" @ctx-close="onClose" @ctx-cancel="onClose" :class="theme">
+    <context-menu ref="m">
         <slot></slot>
-    </vue-context-menu>
+    </context-menu>
 </template>
 
 <style src="./context-menu.css"></style>
 
 <script>
-import VueContextMenu from 'vue-context-menu'
+import { Contextmenu as ContextMenu } from "v-contextmenu";
+import "v-contextmenu/dist/themes/default.css";
 
 
 export default {
     props: {theme: {default: 'compact'}},
     data: () => ({for: undefined}),
-    components: {VueContextMenu},
+    emits: ['action'],
+    components: { ContextMenu },
     methods: {
         open(ev, whatFor) {
             this.for = whatFor;
-            this.$refs.m.open(ev);
+            this.$refs.m.show(ev);
         },
         action(ev) {
-            var item = ev.target.closest('*[name]');
-            if (item) {
-                var name = item.getAttribute('name');
-                this.$emit('action', {type: name, for: this.for});
-            }
+            this.$emit('action', {type: ev.name, for: this.for});
         },
         onClose() {
             setTimeout(() => this.for = undefined, 0); /** @oops must happen after `action` handler */

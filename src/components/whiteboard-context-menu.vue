@@ -1,7 +1,5 @@
 <template>
-    <div>
-    <!--
-    <context-menu ref="m" @action="$emit('action', $event)">
+    <context-menu ref="m">
         <item name="new-conj">New Conjecture</item>
         <item name="new-conn">New Connector</item>
         <hr/>
@@ -12,15 +10,12 @@
         <item name="delete">Delete</item>
         <hr/>
         <item name="inspect">Show Inspector...</item>
-    </context-menu> -->
-    </div>
+    </context-menu>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import ContextMenu from './context-menu/context-menu.vue';
 import Item from './context-menu/context-menu-item.vue';
-
 import { Point2D } from '../geom';
 
 export default {

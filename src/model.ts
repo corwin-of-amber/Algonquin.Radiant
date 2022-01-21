@@ -25,6 +25,10 @@ namespace DocumentModel {
             d.widgets = props.widgets;
             return d;
         }
+
+        static promote(o: Document | Document.Props) {
+            return o instanceof Document ? o : Document.from(o);
+        }
     }
 
     export namespace Document {

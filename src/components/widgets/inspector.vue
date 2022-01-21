@@ -16,6 +16,9 @@ div.sattelite-inspector {
 div.sattelite-inspector .cm-focused {
     outline: none !important;
 }
+div.sattelite-inspector > div {
+    width: 100%;
+}
 </style>
 
 <script lang="ts">
