@@ -20,14 +20,14 @@ import { Point2D } from '../geom';
 import { DragBuddy } from './drag';
 
 
-class ElementDragBuddy<V extends Vue & {dragState: {c: string}, elem: {at: Point2D}} = Vue & {dragState: {c: string}, elem: {at: Point2D}}> extends DragBuddy<V> {
+class ElementDragBuddy<V extends Vue.Component & {dragState: {c: string}, elem: {at: Point2D}} = Vue.Component & {dragState: {c: string}, elem: {at: Point2D}}> extends DragBuddy<V> {
     origin() {
         return {origin: this.o.elem.at};
     }
 }
 
 
-export default Vue.extend({
+export default {
     props: ['elem'],
     data: () => ({dragState: undefined}),
     computed: {
@@ -42,5 +42,5 @@ export default Vue.extend({
             else this._drag.start(ev);
         }
     }
-})
+}
 </script>

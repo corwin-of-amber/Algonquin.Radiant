@@ -53,8 +53,8 @@ import connector from './element-connector.vue';
 import WidgetInspector from './widgets/inspector.vue';
 
 
-export default Vue.extend({
-    props: ['model'],
+export default {
+    data: () => ({model: {}}),
     components: {conj, obj, connector, WhiteboardContextMenu, WidgetInspector},
     methods: {
         elemAction(elem: M.Element, action: A.Action) {
@@ -137,7 +137,7 @@ export default Vue.extend({
             this.elemAction(elem, action);
         }
     }
-});
+}
 
 type MenuContext = {elem?: M.Element, at?: Point2D};
 

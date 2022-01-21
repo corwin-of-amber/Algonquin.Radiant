@@ -12,7 +12,7 @@ import Vue from 'vue';
 import katex from 'katex';
 import 'katex/dist/katex.css';
 
-export default Vue.extend({
+export default {
     props: ['tex'],
     mounted() {
         this.$watch('tex', () => this.refresh(), {immediate: true});
@@ -24,5 +24,5 @@ export default Vue.extend({
             });
         }
     }
-});
+}
 </script>

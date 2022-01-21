@@ -26,7 +26,7 @@ import { EditorState } from  '@codemirror/state';
 import { EditorView, ViewPlugin } from '@codemirror/view';
 
 
-export default Vue.extend({
+export default {
     props: ['widget', 'elem', 'attrs'],
     mounted() {
         var state = EditorState.create({
@@ -60,5 +60,5 @@ export default Vue.extend({
                 ev.preventDefault(); // keep editor focused, if it was
         }
     }
-});
+}
 </script>

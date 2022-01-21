@@ -1,5 +1,6 @@
 import { Grammar, Rule } from 'nearley';
 import { Buffer } from 'safe-buffer';
+import { reactive, ref, Ref } from 'vue';
 Object.assign(window, {Buffer});  // Kremlin discrepancy
 
 import Vue from 'vue';
@@ -18,15 +19,11 @@ class App {
     store = new LocalStore('document');
     view: whiteboard;
 
-    constructor(container = 'div#app') {
-        this.view = new Vue(whiteboard) as whiteboard;
-        this.view.model = this.restore();
-        this.view.$mount(container);
-
-        this.view.$on('action', (loc: A.ActionLocator, action: A.Action) => {
-            A.applyAction(loc, action);
-            this.store.save(this.view.model);
-        });    
+    constructor(container = 'body') {
+        this.view = Vue.createApp(whiteboard, {
+                onAction: (loc: A.ActionLocator, action: A.Action) => this._viewAction(loc, action)
+            }).mount(container) as whiteboard;
+        this.doc = this.restore();
     }
 
     restore() {
@@ -35,7 +32,7 @@ class App {
     }
 
     new() {
-        this.view.model = this._mkdoc();
+        this.doc = this._mkdoc();
     }
 
     save(filename?: string) {
@@ -45,11 +42,19 @@ class App {
     }
 
     open(filename: string) {
-        this.view.model = new FileStore(filename, this.store.ser).load();
+        this.doc = new FileStore(filename, this.store.ser).load();
     }
+
+    get doc(): M.Document { return this.view.model; }
+    set doc(d: M.Document) { this.view.model = d; }
 
     _mkdoc() {
         return new M.Document();
+    }
+
+    _viewAction(loc: A.ActionLocator, action: A.Action) {
+        A.applyAction(loc, action);
+        this.store.save(this.view.model);
     }
 }
 

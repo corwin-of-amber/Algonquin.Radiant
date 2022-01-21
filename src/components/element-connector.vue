@@ -13,7 +13,7 @@ import { Point2D } from '../geom';
 import { DragBuddy } from './drag';
 
 
-class EndpointDragBuddy<V extends Vue & {dragState: {c: string}, elem: {at: Point2D[]}} = Vue & {dragState: {c: string}, elem: {at: Point2D[]}}> extends DragBuddy<V> {
+class EndpointDragBuddy<V extends Vue.Component & {dragState: {c: string}, elem: {at: Point2D[]}} = Vue.Component & {dragState: {c: string}, elem: {at: Point2D[]}}> extends DragBuddy<V> {
     idx: number
 
     constructor(o: V, idx: number) { super(o); this.idx = idx; }
@@ -23,7 +23,7 @@ class EndpointDragBuddy<V extends Vue & {dragState: {c: string}, elem: {at: Poin
     }
 }
 
-export default Vue.extend({
+export default {
     props: ["elem"],
     data: () => ({dragState: undefined}),
     computed: {
@@ -38,5 +38,5 @@ export default Vue.extend({
             this._drag[ep].start(ev);
         }
     }
-});
+}
 </script>

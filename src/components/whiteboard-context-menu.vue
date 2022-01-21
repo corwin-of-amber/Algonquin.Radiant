@@ -1,4 +1,6 @@
 <template>
+    <div>
+    <!--
     <context-menu ref="m" @action="$emit('action', $event)">
         <item name="new-conj">New Conjecture</item>
         <item name="new-conn">New Connector</item>
@@ -10,7 +12,8 @@
         <item name="delete">Delete</item>
         <hr/>
         <item name="inspect">Show Inspector...</item>
-    </context-menu>
+    </context-menu> -->
+    </div>
 </template>
 
 <script lang="ts">
@@ -20,7 +23,7 @@ import Item from './context-menu/context-menu-item.vue';
 
 import { Point2D } from '../geom';
 
-export default Vue.extend({
+export default {
     methods: {
         open(ev: MouseEvent, whatFor: {at?: Point2D}) {
             whatFor.at ??= {x: ev.x, y: ev.y};
@@ -28,5 +31,5 @@ export default Vue.extend({
         }
     },
     components: {ContextMenu, Item}
-})
+}
 </script>
