@@ -102,7 +102,7 @@ namespace PickLexer {
 class PassThroughLexer implements nearley.Lexer {
     lexer: nearley.Lexer
     admit: Set<string>
-    buf: Token[]
+    buf?: Token[]
 
     constructor(lexer: nearley.Lexer) {
         this.lexer = lexer;

@@ -37,6 +37,7 @@ namespace DocumentModel {
 
     export interface Element {
         id: Id
+        type: string
         at: Point2D | Point2D[]
     }
 
@@ -45,7 +46,13 @@ namespace DocumentModel {
     }
 
     export interface TeXElement extends Element {
+        type: 'tex'
         tex: string
+    }
+
+    export interface Connector extends Element {
+        type: 'connector'
+        at: [Point2D, Point2D]
     }
 
     export type Id = string

@@ -22,8 +22,6 @@ div.sattelite-inspector > div {
 </style>
 
 <script lang="ts">
-import Vue from 'vue';
-
 import { basicSetup } from '@codemirror/basic-setup';
 import { EditorState } from  '@codemirror/state';
 import { EditorView, ViewPlugin } from '@codemirror/view';

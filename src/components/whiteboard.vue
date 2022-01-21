@@ -4,13 +4,9 @@
             <circle r="400" cx="150" cy="0"/>
             <circle r="400" cx="500" cy="500"/>
             <template v-for="elem in model.elements">
-                <connector v-if="elem.type == 'connector'"
+                <component :is="elemType(elem)"
                     :key="elem.id" :elem="elem"
                     @action="elemAction(elem, $event)"/>
-                <obj v-else :key="elem.id" :elem="elem"
-                    @action="elemAction(elem, $event)">
-                    <conj :tex="elem.tex"/>
-                </obj>
             </template>
             <obj v-for="widget in model.widgets" :key="widget.id" :elem="widget"
                 @action="elemAction(widget, $event)">
@@ -42,20 +38,30 @@ svg .drag-move > line.hover {
 </style>
 
 <script lang="ts">
-import Vue from 'vue';
+import assert from 'assert';
+
 import WhiteboardContextMenu from './whiteboard-context-menu.vue';
 import { DocumentModel as M, DocumentActions as A } from '../model';
 import { Point2D } from '../geom';
 
 import obj from './element-obj.vue';
-import conj from './conjecture-katex.vue';
+import conjecture from './element-conjecture.vue';
 import connector from './element-connector.vue';
 import WidgetInspector from './widgets/inspector.vue';
 
 
 export default {
-    data: () => ({model: {}}),
-    components: {conj, obj, connector, WhiteboardContextMenu, WidgetInspector},
+    data: () => ({model: {} as M.Document}),
+    components: {
+        WhiteboardContextMenu,
+        /* element types */
+        obj, conjecture, connector,
+        /* widget types */
+        WidgetInspector
+    },
+    mounted() {
+        this.model;
+    },
     methods: {
         elemAction(elem: M.Element, action: A.Action) {
             switch (action.type) {
@@ -70,6 +76,9 @@ export default {
         elemMenu(elem: M.Element, action: A.MenuAction) {
             setTimeout(() =>
                 this.$refs.contextMenu.open(action.ev, {elem}), 0);
+        },
+        elemType(elem: M.Element) {
+            return elem.type ?? 'conjecture';
         },
 
         findElement(id: M.Id) {
@@ -87,22 +96,20 @@ export default {
             }
         },
         menuNewConj(ctx: MenuContext) {
-            var newElem = {
-                type: 'conjecture',
+            assert(ctx.at);
+            (<HACK>this)._mkNewE<M.TeXElement>({
+                type: 'tex',
                 id: this.model.mkId(),
                 at: ctx.at, tex: "xyz"
-            } as M.Element;
-            this.$emit('action', {doc: this.model},
-                                 {type: 'create', newElem});
+            });
         },
         menuNewConn(ctx: MenuContext) {
-            var newElem = {
+            assert (ctx.at);
+            (<HACK>this)._mkNewE<M.Connector>({
                 type: 'connector',
                 id: this.model.mkId(),
                 at: [ctx.at, Point2D.add(ctx.at, CONNECTOR_INIT_VEC)]
-            } as M.Element;
-            this.$emit('action', {doc: this.model},
-                                 {type: 'create', newElem});
+            });
         },
         menuDelete(ctx: MenuContext) {
             this.$emit('action', {doc: this.model, elem: ctx.elem},
@@ -135,8 +142,23 @@ export default {
         },
         onWidgetAction(elem: M.Element, action: A.Action) {
             this.elemAction(elem, action);
+        },
+
+        _mkNewE<E extends M.Element>(newElem: E) {
+            this.$emit('action', {doc: this.model},
+                                 {type: 'create', newElem});
         }
     }
+};
+
+/**
+ * `defineComponent` should induce correct type inference in methods.
+ * But this only works in strict mode, and most files fail with strict mode,
+ * and per-file strict mode setting is not available yet in the IDE.
+ * https://github.com/microsoft/TypeScript/issues/28306
+ */
+interface HACK {
+    _mkNewE<E extends M.Element>(newElem: E): void
 }
 
 type MenuContext = {elem?: M.Element, at?: Point2D};
