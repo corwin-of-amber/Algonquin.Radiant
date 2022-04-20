@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import obj from './element-obj.vue';
+import obj from '../element-obj.vue';
 import katex from './conjecture-katex.vue';
 
 export default {

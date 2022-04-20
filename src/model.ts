@@ -50,6 +50,11 @@ namespace DocumentModel {
         tex: string
     }
 
+    export interface TableElement extends Element {
+        type: 'table'
+        data: any[][]
+    }
+
     export interface Connector extends Element {
         type: 'connector'
         at: [Point2D, Point2D]

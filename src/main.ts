@@ -13,6 +13,8 @@ import { FileStore, LocalStore, StoreBase } from './store';
 
 import { PickLexer, PassThroughLexer } from './syntax/lexer';
 import { SpiralParser } from './syntax/parser';
+import { CATALOG, CatalogEntry } from './elements';
+import { Point2D } from './geom';
 
 
 class App {
@@ -61,7 +63,23 @@ class App {
 function main() {
     var app = new App();
 
-    Object.assign(window, {app});
+    Object.assign(window, {app, create, CATALOG});
+}
+
+function newElementFromCatalog(doc: M.Document, cat: CatalogEntry, pos: Point2D) {
+    return {
+        id: doc.mkId(),
+        type: cat.type,
+        at: pos,
+        ...cat.stencil
+    } as M.Element;
+}
+
+function create(app: App, cat: CatalogEntry) {
+    const at = {x: 50, y: 50},
+          newElem = newElementFromCatalog(app.doc, cat, at);
+    app._viewAction({doc: app.doc, elem: null},
+        {type: 'create', newElem} as A.CreateAction)
 }
 
 

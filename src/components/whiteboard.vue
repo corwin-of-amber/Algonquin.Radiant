@@ -3,15 +3,14 @@
         <svg xmlns="http://www.w3.org/2000/svg" @mousedown="onMouseDown">
             <circle r="400" cx="150" cy="0"/>
             <circle r="400" cx="500" cy="500"/>
-            <template v-for="elem in model.elements">
-                <component :is="elemType(elem)"
-                    :key="elem.id" :elem="elem"
+            <template v-for="elem in model.elements" :key="elem.id">
+                <component :is="elemType(elem)" :elem="elem"
                     @action="elemAction(elem, $event)"/>
             </template>
             <obj v-for="widget in model.widgets" :key="widget.id" :elem="widget"
                 @action="elemAction(widget, $event)">
                 <widget-inspector :widget="widget"
-                    :elem="findElement(widget.for)" :attrs="['tex']"
+                    :elem="findElement(widget.for)" :props="propsFor(findElement(widget.for))"
                     @action="onWidgetAction"/>
             </obj>
         </svg>
@@ -44,9 +43,11 @@ import WhiteboardContextMenu from './whiteboard-context-menu.vue';
 import { DocumentModel as M, DocumentActions as A } from '../model';
 import { Point2D } from '../geom';
 
+import { CATALOG } from '../elements';
 import obj from './element-obj.vue';
-import conjecture from './element-conjecture.vue';
+import conjecture from './elements/element-conjecture.vue';
 import connector from './element-connector.vue';
+import atable from './elements/element-table.vue';
 import WidgetInspector from './widgets/inspector.vue';
 
 
@@ -55,7 +56,7 @@ export default {
     components: {
         WhiteboardContextMenu,
         /* element types */
-        obj, conjecture, connector,
+        obj, conjecture, connector, atable,
         /* widget types */
         WidgetInspector
     },
@@ -83,6 +84,10 @@ export default {
 
         findElement(id: M.Id) {
             return this.model.findId(id);
+        },
+        propsFor(elem: M.Element) {
+            var cat = CATALOG[elem.type];
+            return cat?.props ?? {'value': {format: 'json'}};
         },
 
         menuAction(ev: {type: string, for: MenuContext}) {
