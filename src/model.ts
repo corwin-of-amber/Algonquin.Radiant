@@ -45,21 +45,6 @@ namespace DocumentModel {
         for?: Id
     }
 
-    export interface TeXElement extends Element {
-        type: 'tex'
-        tex: string
-    }
-
-    export interface TableElement extends Element {
-        type: 'table'
-        data: any[][]
-    }
-
-    export interface Connector extends Element {
-        type: 'connector'
-        at: [Point2D, Point2D]
-    }
-
     export type Id = string
 
     export function isWidget(e: Element): e is Widget {

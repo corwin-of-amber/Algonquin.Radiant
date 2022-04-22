@@ -43,7 +43,7 @@ import WhiteboardContextMenu from './whiteboard-context-menu.vue';
 import { DocumentModel as M, DocumentActions as A } from '../model';
 import { Point2D } from '../geom';
 
-import { CATALOG } from '../elements';
+import { CATALOG, ConjectureElement, Connector } from '../elements';
 import obj from './element-obj.vue';
 import conjecture from './elements/element-conjecture.vue';
 import connector from './element-connector.vue';
@@ -102,15 +102,15 @@ export default {
         },
         menuNewConj(ctx: MenuContext) {
             assert(ctx.at);
-            (<HACK>this)._mkNewE<M.TeXElement>({
-                type: 'tex',
+            (<HACK>this)._mkNewE<ConjectureElement>({
+                type: 'conjecture',
                 id: this.model.mkId(),
                 at: ctx.at, tex: "xyz"
             });
         },
         menuNewConn(ctx: MenuContext) {
             assert (ctx.at);
-            (<HACK>this)._mkNewE<M.Connector>({
+            (<HACK>this)._mkNewE<Connector>({
                 type: 'connector',
                 id: this.model.mkId(),
                 at: [ctx.at, Point2D.add(ctx.at, CONNECTOR_INIT_VEC)]
@@ -136,7 +136,8 @@ export default {
                 id: this.model.mkId(),
                 at: Point2D.add(at, INSPECTOR_OFFSET), for: ctx.elem.id
             };
-            this.$emit('action', {doc: this.model}, {type: 'create', newElem})
+            this.$emit('action', {doc: this.model},
+                                 {type: 'create', newElem})
         },
 
         onMouseDown(ev: MouseEvent) {

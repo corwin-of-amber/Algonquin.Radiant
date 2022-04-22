@@ -1,6 +1,9 @@
 <template>
     <obj :elem="elem">
         <table>
+            <tr class="header-row">
+                <th v-for="cell,$j in elem.header ?? []" :key="$j">{{cell}}</th>
+            </tr>
             <tr v-for="row,$i in elem.data" :key="$i">
                 <td v-for="cell,$j in row" :key="$j">
                     <component :is="dataElement ?? 'element-default'"

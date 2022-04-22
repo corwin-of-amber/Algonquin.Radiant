@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
 
-abstract class DragBuddy<V extends Vue & {dragState: {c: string}} = Vue & {dragState: {c: string}}, A={}> {
+abstract class DragBuddy<V extends Vue.ComponentPublicInstance & {dragState: {c: string}} = Vue.ComponentPublicInstance & {dragState: {c: string}}, A={}> {
     o: V
     _dragGesture: {origin: A, from: any}
     _moveh: (ev: MouseEvent) => void;

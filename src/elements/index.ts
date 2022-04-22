@@ -17,7 +17,7 @@ const CATALOG: Catalog = mkCatalog({
             tex: 'x^yz'
         },
     },
-    'table': {
+    'atable': {
         stencil: {
             header: [undefined, 'A', 'B', 'C'],
             data: [[1, 'a', 'b', 'c'], [2, 'x', 'y', 'z']]
@@ -42,12 +42,12 @@ function mkCatalog(props: {[objtype: string]: CatalogEntryProps}): Catalog {
 
 
 export interface ConjectureElement extends M.Element {
-    type: 'tex'
+    type: 'conjecture'
     tex: string
 }
 
 export interface TableElement extends M.Element {
-    type: 'table'
+    type: 'atable'
     data: any[][]
 }
 

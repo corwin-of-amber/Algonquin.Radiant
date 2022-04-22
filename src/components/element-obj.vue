@@ -20,7 +20,13 @@ import { Point2D } from '../geom';
 import { DragBuddy } from './drag';
 
 
-class ElementDragBuddy<V extends Vue.Component & {dragState: {c: string}, elem: {at: Point2D}} = Vue.Component & {dragState: {c: string}, elem: {at: Point2D}}> extends DragBuddy<V> {
+class ElementDragBuddy<
+        V extends Vue.ComponentPublicInstance & 
+            {dragState: {c: string}, elem: {at: Point2D}} = 
+        Vue.ComponentPublicInstance &
+            {dragState: {c: string}, elem: {at: Point2D}}>
+    extends DragBuddy<V>
+{
     origin() {
         return {origin: this.o.elem.at};
     }

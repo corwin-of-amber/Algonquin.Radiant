@@ -1,17 +1,22 @@
 <template>
-    <div @mousedown="onMouseGuard">
-        <div class="inspector--prop-name">{{prop}}</div>
-        <div ref="editor-container" v-once/>
+    <div class="inspector--prop" @mousedown="onMouseGuard">
+        <div class="inspector--prop-name" v-if="showName">{{prop}}</div>
+        <div class="inspector--prop-value" ref="editor-container" v-once/>
     </div>
 </template>
 
-<style> /* cannot use `scoped` here because CodeMirror has its own DOM */
-div.sattelite-inspector .cm-focused {
+<style scoped>
+div.inspector--prop :deep(.cm-focused) {
     outline: none !important;
+    height: 100%;
 }
-div.sattelite-inspector > div {
+div.inspector--prop {
     width: 100%;
 }
+div.inspector--prop-value {
+    max-height: 7em;
+    overflow: auto;
+} 
 </style>
 
 <script lang="ts">
@@ -21,7 +26,8 @@ import { EditorView, ViewPlugin } from '@codemirror/view';
 
 
 export default {
-    props: ['elem', 'prop', 'format'],
+    props: {elem: Object, prop: String, format: String,
+            showName: {type: Boolean, default: true}},
     mounted() {
         var state = EditorState.create({
             doc: this.unparse(this.elem?.[this.prop]),
