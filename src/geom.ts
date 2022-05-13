@@ -2,7 +2,8 @@
  * Really basic 2D geometry.
  */
 
-type Point2D = {x: number, y: number};
+type XY<T> = {x: T, y: T};
+type Point2D = XY<number>;
 
 namespace Point2D {
     export const O = {x: 0, y: 0};

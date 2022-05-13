@@ -1,10 +1,12 @@
 <template>
-    <div class="sattelite-inspector" :class="{'with-names': isWithNames()}">
-        <prop-editor v-for="def, name in props" :key="name"
-            :elem="elem" :prop="name" :format="def.format"
-            :showName="isWithNames()"
-            @action="(e, a) => $emit('action', e, a)"/>
-    </div>
+    <obj :elem="widget">
+        <div class="sattelite-inspector" :class="{'with-names': isWithNames()}">
+            <prop-editor v-for="def, name in props" :key="name"
+                :elem="elem" :prop="name" :format="def.format"
+                :showName="isWithNames()"
+                @action="(e, a) => $emit('action', e, a)"/>
+        </div>
+    </obj>
 </template>
 
 <style scoped>
@@ -40,6 +42,7 @@ div :deep(.inspector--prop-name) {
 </style>
 
 <script lang="ts">
+import Obj from '../element-obj.vue';
 import PropEditor from './inspector-prop.vue';
 
 
@@ -48,6 +51,6 @@ export default {
     methods: {
         isWithNames() { return Object.keys(this.props).length > 1; }
     },
-    components: { PropEditor }
+    components: { Obj, PropEditor }
 }
 </script>

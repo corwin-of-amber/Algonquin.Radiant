@@ -7,12 +7,11 @@
                 <component :is="elemType(elem)" :elem="elem"
                     @action="elemAction(elem, $event)"/>
             </template>
-            <obj v-for="widget in model.widgets" :key="widget.id" :elem="widget"
-                @action="elemAction(widget, $event)">
-                <widget-inspector :widget="widget"
+            <template v-for="widget in model.widgets" :key="widget.id" :elem="widget">
+                <component :is="widgetType(widget)" :widget="widget"
                     :elem="findElement(widget.for)" :props="propsFor(findElement(widget.for))"
-                    @action="onWidgetAction"/>
-            </obj>
+                    @action="onWidgetAction(widget, $event)"/>
+            </template>
         </svg>
         <whiteboard-context-menu ref="contextMenu" @action="menuAction"/>
     </div>
@@ -48,7 +47,9 @@ import obj from './element-obj.vue';
 import conjecture from './elements/element-conjecture.vue';
 import connector from './element-connector.vue';
 import atable from './elements/element-table.vue';
+import computation from './elements/element-computation.vue';
 import WidgetInspector from './widgets/inspector.vue';
+import knob from './widgets/widget-knob.vue';
 
 
 export default {
@@ -56,9 +57,9 @@ export default {
     components: {
         WhiteboardContextMenu,
         /* element types */
-        obj, conjecture, connector, atable,
+        obj, conjecture, connector, atable, computation,
         /* widget types */
-        WidgetInspector
+        WidgetInspector, knob
     },
     mounted() {
         this.model;
@@ -80,6 +81,9 @@ export default {
         },
         elemType(elem: M.Element) {
             return elem.type ?? 'conjecture';
+        },
+        widgetType(widget: M.Widget) {
+            return widget.type ?? 'widget-inspector';
         },
 
         findElement(id: M.Id) {

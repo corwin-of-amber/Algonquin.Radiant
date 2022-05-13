@@ -22,6 +22,11 @@ const CATALOG: Catalog = mkCatalog({
             header: [undefined, 'A', 'B', 'C'],
             data: [[1, 'a', 'b', 'c'], [2, 'x', 'y', 'z']]
         }
+    },
+    'computation': {
+        stencil: {
+            code: 'return {};'
+        }
     }
 });
 
@@ -72,4 +77,4 @@ function mapValues<T, S>(o: {[k: string]: T}, f: (v: T) => S): {[k: string]: S} 
 }
 
 
-export { CATALOG, Catalog, CatalogEntry }
+export { CATALOG, Catalog, CatalogEntry, mkCatalog }

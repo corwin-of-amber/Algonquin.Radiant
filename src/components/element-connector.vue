@@ -13,7 +13,7 @@ import { Point2D } from '../geom';
 import { DragBuddy } from './drag';
 
 
-class EndpointDragBuddy<V extends Vue.Component & {dragState: {c: string}, elem: {at: Point2D[]}} = Vue.Component & {dragState: {c: string}, elem: {at: Point2D[]}}> extends DragBuddy<V> {
+class EndpointDragBuddy<V extends Vue.ComponentPublicInstance & {dragState: {c: string}, elem: {at: Point2D[]}} = Vue.ComponentPublicInstance & {dragState: {c: string}, elem: {at: Point2D[]}}> extends DragBuddy<V> {
     idx: number
 
     constructor(o: V, idx: number) { super(o); this.idx = idx; }

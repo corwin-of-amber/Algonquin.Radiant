@@ -39,16 +39,33 @@ namespace DocumentModel {
         id: Id
         type: string
         at: Point2D | Point2D[]
+        format?: ElementDisplayFormat
     }
 
     export interface Widget extends Element {
         for?: Id
     }
 
+    export interface EphemeralWidget extends Widget {
+        ephemeral: true
+    }
+
     export type Id = string
+
+    export type ElementDisplayFormat = {
+        size: Sizer
+    }
+
+    export type Sizer = Point2D & {
+        stretch: boolean | {x: boolean, y: boolean}
+    }
 
     export function isWidget(e: Element): e is Widget {
         return !!(<Widget>e).for;
+    }
+
+    export function isEphemeralWidget(e: Element): e is Widget {
+        return isWidget(e) && !!(<EphemeralWidget>e).ephemeral;
     }
 
 }

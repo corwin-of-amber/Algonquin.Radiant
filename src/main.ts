@@ -14,6 +14,7 @@ import { FileStore, LocalStore, StoreBase } from './store';
 import { PickLexer, PassThroughLexer } from './syntax/lexer';
 import { SpiralParser } from './syntax/parser';
 import { CATALOG, CatalogEntry } from './elements';
+import { CATALOG as WCATALOG } from './widgets';
 import { Point2D } from './geom';
 
 
@@ -63,7 +64,7 @@ class App {
 function main() {
     var app = new App();
 
-    Object.assign(window, {app, create, CATALOG});
+    Object.assign(window, {app, create, CATALOG, WCATALOG, Vue});
 }
 
 function newElementFromCatalog(doc: M.Document, cat: CatalogEntry, pos: Point2D) {
@@ -75,9 +76,20 @@ function newElementFromCatalog(doc: M.Document, cat: CatalogEntry, pos: Point2D)
     } as M.Element;
 }
 
-function create(app: App, cat: CatalogEntry) {
+function newWidgetFromCatalog(doc: M.Document, elem: M.Element, cat: CatalogEntry, pos: Point2D) {
+    return {
+        id: doc.mkId(),
+        type: cat.type,
+        at: pos,
+        for: elem,
+        ...cat.stencil
+    }
+}
+
+function create(app: App, cat: CatalogEntry, forElem?: M.Element) {
     const at = {x: 50, y: 50},
-          newElem = newElementFromCatalog(app.doc, cat, at);
+          newElem = forElem ? newWidgetFromCatalog(app.doc, forElem, cat, at)
+                            : newElementFromCatalog(app.doc, cat, at);
     app._viewAction({doc: app.doc, elem: null},
         {type: 'create', newElem} as A.CreateAction)
 }
