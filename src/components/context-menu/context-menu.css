@@ -1,4 +1,9 @@
-.ctx-menu-container.compact ul[role=menu] {
+.v-contextmenu:focus {
+    outline: none;
+    box-shadow: 2px 2px 8px 0 rgb(150 150 150 / 50%);
+}
+
+.v-contextmenu.compact ul {
     font-family: sans-serif;
     font-size: 10pt;
     line-height: 15pt;
