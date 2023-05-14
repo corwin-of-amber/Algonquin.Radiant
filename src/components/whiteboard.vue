@@ -37,6 +37,7 @@ svg .drag-move > line.hover {
 
 <script lang="ts">
 import assert from 'assert';
+import { Vue, Component } from 'vue-facing-decorator';
 
 import WhiteboardContextMenu from './whiteboard-context-menu.vue';
 import { DocumentModel as M, DocumentActions as A } from '../model';
@@ -51,115 +52,113 @@ import computation from './elements/element-computation.vue';
 import WidgetInspector from './widgets/inspector.vue';
 import knob from './widgets/widget-knob.vue';
 
-
-export default {
-    data: () => ({model: {} as M.Document}),
+@Component({
     components: {
         WhiteboardContextMenu,
         /* element types */
         obj, conjecture, connector, atable, computation,
         /* widget types */
         WidgetInspector, knob
-    },
-    mounted() {
-        this.model;
-    },
-    methods: {
-        elemAction(elem: M.Element, action: A.Action) {
-            switch (action.type) {
-            case 'select':  this.elemSelect(elem, action);   break;
-            case 'menu':    this.elemMenu(elem, action);     break;
-            }
-            this.$emit('action', {doc: this.model, elem}, action);
-        },
-        elemSelect(elem: M.Element, action: A.SelectAction) {
-            console.log('select', elem);
-        },
-        elemMenu(elem: M.Element, action: A.MenuAction) {
-            setTimeout(() =>
-                this.$refs.contextMenu.open(action.ev, {elem}), 0);
-        },
-        elemType(elem: M.Element) {
-            return elem.type ?? 'conjecture';
-        },
-        widgetType(widget: M.Widget) {
-            return widget.type ?? 'widget-inspector';
-        },
+    }
+})
+export default class WhiteboardApp extends Vue {
+    model: M.Document = {} as M.Document
+    $refs: any
 
-        findElement(id: M.Id) {
-            return this.model.findId(id);
-        },
-        propsFor(elem: M.Element) {
-            var cat = CATALOG[elem.type];
-            return cat?.props ?? {'value': {format: 'json'}};
-        },
+    elemAction(elem: M.Element, action: A.Action) {
+        switch (action.type) {
+        case 'select':  this.elemSelect(elem, action as A.SelectAction);   break;
+        case 'menu':    this.elemMenu(elem, action as A.MenuAction);       break;
+        }
+        this.$emit('action', {doc: this.model, elem}, action);
+    }
+    elemSelect(elem: M.Element, action: A.SelectAction) {
+        console.log('select', elem);
+    }
+    elemMenu(elem: M.Element, action: A.MenuAction) {
+        setTimeout(() =>
+            this.$refs.contextMenu.open(action.ev, {elem}), 0);
+    }
+    elemType(elem: M.Element) {
+        return elem.type ?? 'conjecture';
+    }
+    widgetType(widget: M.Widget) {
+        return widget.type ?? 'widget-inspector';
+    }
 
-        menuAction(ev: {type: string, for: MenuContext}) {
-            switch (ev.type) {
-            case 'new-conj':  this.menuNewConj(ev.for);  break;
-            case 'new-conn':  this.menuNewConn(ev.for);  break;
-            case 'cut':
-            case 'delete':    this.menuDelete(ev.for);   break;
-            case 'duplicate': this.menuDuplicate(ev.for); break;
-            case 'inspect':   this.menuInspect(ev.for);  break;
-            }
-        },
-        menuNewConj(ctx: MenuContext) {
-            assert(ctx.at);
-            (<HACK>this)._mkNewE<ConjectureElement>({
-                type: 'conjecture',
-                id: this.model.mkId(),
-                at: ctx.at, tex: "xyz"
-            });
-        },
-        menuNewConn(ctx: MenuContext) {
-            assert (ctx.at);
-            (<HACK>this)._mkNewE<Connector>({
-                type: 'connector',
-                id: this.model.mkId(),
-                at: [ctx.at, Point2D.add(ctx.at, CONNECTOR_INIT_VEC)]
-            });
-        },
-        menuDelete(ctx: MenuContext) {
-            this.$emit('action', {doc: this.model, elem: ctx.elem},
-                                 {type: 'delete'});
-        },
-        menuDuplicate(ctx: MenuContext) {
-            var shift = (p: Point2D) => Point2D.add(p, DUPLICATE_OFFSET),
-                at = ctx.elem.at;
-            at = Array.isArray(at) ? at.map(shift) : shift(at);
-            var newElem = {...ctx.elem,
-                id: this.model.mkId(), at
-            } as M.Element;
-            this.$emit('action', {doc: this.model},
-                                 {type: 'create', newElem});
-        },
-        menuInspect(ctx: MenuContext) {
-            var at = ctx.at || ctx.elem.at as Point2D;
-            var newElem = {
-                id: this.model.mkId(),
-                at: Point2D.add(at, INSPECTOR_OFFSET), for: ctx.elem.id
-            };
-            this.$emit('action', {doc: this.model},
-                                 {type: 'create', newElem})
-        },
+    findElement(id: M.Id) {
+        return this.model.findId(id);
+    }
+    propsFor(elem: M.Element) {
+        var cat = CATALOG[elem.type];
+        return cat?.props ?? {'value': {format: 'json'}};
+    }
 
-        onMouseDown(ev: MouseEvent) {
-            if (ev.button == 2) {
-                setTimeout(() =>
-                    this.$refs.contextMenu.open(ev, {}), 0);
-            }
-        },
-        onWidgetAction(elem: M.Element, action: A.Action) {
-            this.elemAction(elem, action);
-        },
-
-        _mkNewE<E extends M.Element>(newElem: E) {
-            this.$emit('action', {doc: this.model},
-                                 {type: 'create', newElem});
+    menuAction(ev: {type: string, for: MenuContext}) {
+        switch (ev.type) {
+        case 'new-conj':  this.menuNewConj(ev.for);  break;
+        case 'new-conn':  this.menuNewConn(ev.for);  break;
+        case 'cut':
+        case 'delete':    this.menuDelete(ev.for);   break;
+        case 'duplicate': this.menuDuplicate(ev.for); break;
+        case 'inspect':   this.menuInspect(ev.for);  break;
         }
     }
-};
+    menuNewConj(ctx: MenuContext) {
+        assert(ctx.at);
+        (<HACK>this)._mkNewE<ConjectureElement>({
+            type: 'conjecture',
+            id: this.model.mkId(),
+            at: ctx.at, tex: "xyz"
+        });
+    }
+    menuNewConn(ctx: MenuContext) {
+        assert (ctx.at);
+        (<HACK>this)._mkNewE<Connector>({
+            type: 'connector',
+            id: this.model.mkId(),
+            at: [ctx.at, Point2D.add(ctx.at, CONNECTOR_INIT_VEC)]
+        });
+    }
+    menuDelete(ctx: MenuContext) {
+        this.$emit('action', {doc: this.model, elem: ctx.elem},
+                                {type: 'delete'});
+    }
+    menuDuplicate(ctx: MenuContext) {
+        var shift = (p: Point2D) => Point2D.add(p, DUPLICATE_OFFSET),
+            at = ctx.elem.at;
+        at = Array.isArray(at) ? at.map(shift) : shift(at);
+        var newElem = {...ctx.elem,
+            id: this.model.mkId(), at
+        } as M.Element;
+        this.$emit('action', {doc: this.model},
+                                {type: 'create', newElem});
+    }
+    menuInspect(ctx: MenuContext) {
+        var at = ctx.at || ctx.elem.at as Point2D;
+        var newElem = {
+            id: this.model.mkId(),
+            at: Point2D.add(at, INSPECTOR_OFFSET), for: ctx.elem.id
+        };
+        this.$emit('action', {doc: this.model},
+                                {type: 'create', newElem})
+    }
+
+    onMouseDown(ev: MouseEvent) {
+        if (ev.button == 2) {
+            setTimeout(() =>
+                this.$refs.contextMenu.open(ev, {}), 0);
+        }
+    }
+    onWidgetAction(elem: M.Element, action: A.Action) {
+        this.elemAction(elem, action);
+    }
+
+    _mkNewE<E extends M.Element>(newElem: E) {
+        this.$emit('action', {doc: this.model},
+                                {type: 'create', newElem});
+    }
+}
 
 /**
  * `defineComponent` should induce correct type inference in methods.
