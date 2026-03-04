@@ -4,10 +4,15 @@ import { DocumentModel as M } from '../model';
 
 class ReactiveComputation {
     doc: M.Document
+    innerAPI: Dollar
     _resources: Resource[] = []
 
     constructor(doc: M.Document) {
         this.doc = doc;
+        this.innerAPI = ((id: any) => {
+            return (<any>this.doc.findId(id)).value;
+        }) as Dollar;
+        this.innerAPI.doc = this.doc;
     }
 
     eval(code: string) {
@@ -16,11 +21,10 @@ class ReactiveComputation {
             var func = new Function('$', code ?? '');
         }
         catch (e) { 
-            console.warn('(compiling computation code)', e);
-            return {value: null};
+            return {value: null, err: e};
         }
         try {
-            return {value: func(this)};
+            return {value: func(this.innerAPI)};
         }
         catch (e) {
             this.cleanup();
@@ -40,6 +44,12 @@ class ReactiveComputation {
         }
         this._resources = [];
     }
+}
+
+type Dollar = ((id: string) => any) & DollarEtc;
+
+interface DollarEtc {
+    doc: M.Document
 }
 
 type Resource = {cleanup: () => void};

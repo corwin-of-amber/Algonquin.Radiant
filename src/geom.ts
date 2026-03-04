@@ -2,7 +2,7 @@
  * Really basic 2D geometry.
  */
 
-type XY<T> = {x: T, y: T};
+type XY<T = number> = {x: T, y: T};
 type Point2D = XY<number>;
 
 namespace Point2D {
@@ -13,4 +13,4 @@ namespace Point2D {
     }
 }
 
-export { Point2D }
+export { XY, Point2D }

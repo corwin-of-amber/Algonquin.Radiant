@@ -4,8 +4,8 @@ import { reactive, ref, Ref } from 'vue';
 Object.assign(window, {Buffer});  // Kremlin discrepancy
 
 import Vue from 'vue';
-// @ts-ignore
-import whiteboard from './components/whiteboard.vue';
+
+import whiteboard, { IWhiteboardApp } from './components/whiteboard.vue';
 import './main.css';
 
 import { DocumentModel as M, DocumentActions as A } from './model';
@@ -19,13 +19,13 @@ import { Point2D } from './geom';
 
 
 class App {
-    store = new LocalStore('document');
-    view: whiteboard;
+    store = new LocalStore('document')
+    view: IWhiteboardApp
 
     constructor(container = 'body') {
         this.view = Vue.createApp(whiteboard, {
                 onAction: (loc: A.ActionLocator, action: A.Action) => this._viewAction(loc, action)
-            }).mount(container) as whiteboard;
+            }).mount(container) as IWhiteboardApp;
         this.doc = this.restore();
     }
 
@@ -64,34 +64,7 @@ class App {
 function main() {
     var app = new App();
 
-    Object.assign(window, {app, create, CATALOG, WCATALOG, Vue});
-}
-
-function newElementFromCatalog(doc: M.Document, cat: CatalogEntry, pos: Point2D) {
-    return {
-        id: doc.mkId(),
-        type: cat.type,
-        at: pos,
-        ...cat.stencil
-    } as M.Element;
-}
-
-function newWidgetFromCatalog(doc: M.Document, elem: M.Element, cat: CatalogEntry, pos: Point2D) {
-    return {
-        id: doc.mkId(),
-        type: cat.type,
-        at: pos,
-        for: elem,
-        ...cat.stencil
-    }
-}
-
-function create(app: App, cat: CatalogEntry, forElem?: M.Element) {
-    const at = {x: 50, y: 50},
-          newElem = forElem ? newWidgetFromCatalog(app.doc, forElem, cat, at)
-                            : newElementFromCatalog(app.doc, cat, at);
-    app._viewAction({doc: app.doc, elem: null},
-        {type: 'create', newElem} as A.CreateAction)
+    Object.assign(window, {app, CATALOG, WCATALOG, Vue});
 }
 
 

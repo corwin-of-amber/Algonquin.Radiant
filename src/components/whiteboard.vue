@@ -10,7 +10,7 @@
             <template v-for="widget in model.widgets" :key="widget.id" :elem="widget">
                 <component :is="widgetType(widget)" :widget="widget"
                     :elem="findElement(widget.for)" :props="propsFor(findElement(widget.for))"
-                    @action="onWidgetAction(widget, $event)"/>
+                    @action="onWidgetAction($event.elem ?? widget, $event)"/>
             </template>
         </svg>
         <whiteboard-context-menu ref="contextMenu" @action="menuAction"/>
@@ -37,13 +37,13 @@ svg .drag-move > line.hover {
 
 <script lang="ts">
 import assert from 'assert';
-import { Vue, Component } from 'vue-facing-decorator';
+import { Vue, Component, toNative } from 'vue-facing-decorator';
 
 import WhiteboardContextMenu from './whiteboard-context-menu.vue';
 import { DocumentModel as M, DocumentActions as A } from '../model';
 import { Point2D } from '../geom';
 
-import { CATALOG, ConjectureElement, Connector } from '../elements';
+import { CATALOG, CatalogEntry, ConjectureElement, Connector } from '../elements';
 import obj from './element-obj.vue';
 import conjecture from './elements/element-conjecture.vue';
 import connector from './element-connector.vue';
@@ -59,9 +59,10 @@ import knob from './widgets/widget-knob.vue';
         obj, conjecture, connector, atable, computation,
         /* widget types */
         WidgetInspector, knob
-    }
+    },
+    emits: ['action']
 })
-export default class WhiteboardApp extends Vue {
+class IWhiteboardApp extends Vue {
     model: M.Document = {} as M.Document
     $refs: any
 
@@ -90,39 +91,31 @@ export default class WhiteboardApp extends Vue {
         return this.model.findId(id);
     }
     propsFor(elem: M.Element) {
+        if (!elem) return {};
+
         var cat = CATALOG[elem.type];
         return cat?.props ?? {'value': {format: 'json'}};
     }
 
     menuAction(ev: {type: string, for: MenuContext}) {
         switch (ev.type) {
-        case 'new-conj':  this.menuNewConj(ev.for);  break;
-        case 'new-conn':  this.menuNewConn(ev.for);  break;
+        case 'new-conj':  this.menuNew(CATALOG.conjecture, ev.for);   break;
+        case 'new-comp':  this.menuNew(CATALOG.computation, ev.for);  break;
+        case 'new-tabl':  this.menuNew(CATALOG.atable, ev.for);       break;
         case 'cut':
         case 'delete':    this.menuDelete(ev.for);   break;
         case 'duplicate': this.menuDuplicate(ev.for); break;
         case 'inspect':   this.menuInspect(ev.for);  break;
+        case 'copy-id':   this.menuCopyId(ev.for);  break;
         }
     }
-    menuNewConj(ctx: MenuContext) {
-        assert(ctx.at);
-        (<HACK>this)._mkNewE<ConjectureElement>({
-            type: 'conjecture',
-            id: this.model.mkId(),
-            at: ctx.at, tex: "xyz"
-        });
-    }
-    menuNewConn(ctx: MenuContext) {
-        assert (ctx.at);
-        (<HACK>this)._mkNewE<Connector>({
-            type: 'connector',
-            id: this.model.mkId(),
-            at: [ctx.at, Point2D.add(ctx.at, CONNECTOR_INIT_VEC)]
-        });
+    menuNew(cat: CatalogEntry, ctx: MenuContext) {
+        this.$emit('action', {doc: this.model},
+                   {type: 'create', cat, at: ctx.at});
     }
     menuDelete(ctx: MenuContext) {
         this.$emit('action', {doc: this.model, elem: ctx.elem},
-                                {type: 'delete'});
+                   {type: 'delete'});
     }
     menuDuplicate(ctx: MenuContext) {
         var shift = (p: Point2D) => Point2D.add(p, DUPLICATE_OFFSET),
@@ -132,7 +125,7 @@ export default class WhiteboardApp extends Vue {
             id: this.model.mkId(), at
         } as M.Element;
         this.$emit('action', {doc: this.model},
-                                {type: 'create', newElem});
+                   {type: 'create', newElem});
     }
     menuInspect(ctx: MenuContext) {
         var at = ctx.at || ctx.elem.at as Point2D;
@@ -142,6 +135,10 @@ export default class WhiteboardApp extends Vue {
         };
         this.$emit('action', {doc: this.model},
                                 {type: 'create', newElem})
+    }
+    menuCopyId(ctx: MenuContext) {
+        console.log(ctx.elem.id);
+        navigator.clipboard.writeText(ctx.elem.id);
     }
 
     onMouseDown(ev: MouseEvent) {
@@ -153,21 +150,14 @@ export default class WhiteboardApp extends Vue {
     onWidgetAction(elem: M.Element, action: A.Action) {
         this.elemAction(elem, action);
     }
+    /*onWidgetAction(widget: M.Widget, ev: {target: M.Element, action: A.Action}) {
+        this.elemAction(ev.target, ev.action);
+    }*/
 
     _mkNewE<E extends M.Element>(newElem: E) {
         this.$emit('action', {doc: this.model},
-                                {type: 'create', newElem});
+                   {type: 'create', newElem});
     }
-}
-
-/**
- * `defineComponent` should induce correct type inference in methods.
- * But this only works in strict mode, and most files fail with strict mode,
- * and per-file strict mode setting is not available yet in the IDE.
- * https://github.com/microsoft/TypeScript/issues/28306
- */
-interface HACK {
-    _mkNewE<E extends M.Element>(newElem: E): void
 }
 
 type MenuContext = {elem?: M.Element, at?: Point2D};
@@ -175,4 +165,7 @@ type MenuContext = {elem?: M.Element, at?: Point2D};
 const CONNECTOR_INIT_VEC = {x: 30, y: 30},
       INSPECTOR_OFFSET = {x: 40, y: -20},
       DUPLICATE_OFFSET = {x: -30, y: 30};
+
+export { IWhiteboardApp }
+export default toNative(IWhiteboardApp)
 </script>

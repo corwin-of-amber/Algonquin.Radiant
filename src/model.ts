@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { CatalogEntry } from './elements';
 import { Point2D } from './geom';
 
 
@@ -92,7 +93,16 @@ namespace DocumentActions {
 
     export interface CreateAction extends Action {
         type: 'create'
+    }
+
+    export interface CreateDirectAction extends CreateAction {
         newElem: M.Element
+    }
+
+    export interface CreateFromCatalogAction extends CreateAction {
+        type: 'create'
+        at: Point2D
+        cat: CatalogEntry
     }
 
     export interface DeleteAction extends Action {
@@ -137,8 +147,10 @@ namespace DocumentActions {
     }
 
     function applyCreate(loc: ActionLocator, action: CreateAction) {
-        var l = M.isWidget(action.newElem) ? loc.doc.widgets : loc.doc.elements;
-        l.push(action.newElem);
+        var e = (<CreateDirectAction>action).newElem ??
+                    newFromCatalog(loc.doc, (<CreateFromCatalogAction>action).cat, (<CreateFromCatalogAction>action).at),
+            l = M.isWidget(e) ? loc.doc.widgets : loc.doc.elements;
+        l.push(e);
     }
 
     function applyDelete(loc: ActionLocator, action: DeleteAction) {
@@ -152,6 +164,15 @@ namespace DocumentActions {
         loc.elem[action.attrName] = action.attrValue;
     }
 
+    function newFromCatalog(doc: M.Document, cat: CatalogEntry, at: Point2D, forElem?: M.Element) {
+        return {
+            id: doc.mkId(),
+            type: cat.type,
+            at,
+            for: forElem,
+            ...cat.stencil
+        } as M.Element | M.Widget;
+    }
 }
 
 

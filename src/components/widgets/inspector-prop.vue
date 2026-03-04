@@ -58,8 +58,9 @@ export default {
         onChange(state: EditorState) {
             if (this.elem && this.prop) {
                 try {
-                    this.$emit('action', this.elem, {
+                    this.$emit('action', {
                         type: 'edit-attr',
+                        elem: this.elem,
                         attrName: this.prop,
                         attrValue: this.parse(state.sliceDoc())
                     });
