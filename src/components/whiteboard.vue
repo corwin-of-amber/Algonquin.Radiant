@@ -1,14 +1,15 @@
 <template>
     <div class="whiteboard" @contextmenu.stop.prevent>
-        <svg xmlns="http://www.w3.org/2000/svg" @mousedown="onMouseDown">
+        <svg ref="svg" xmlns="http://www.w3.org/2000/svg"
+                class="sketchvg--container" @mousedown="onMouseDown">
             <circle r="400" cx="150" cy="0"/>
             <circle r="400" cx="500" cy="500"/>
             <template v-for="elem in model.elements" :key="elem.id">
-                <component :is="elemType(elem)" :elem="elem"
+                <component :is="elemComponentType(elem)" :elem="elem"
                     @action="elemAction(elem, $event)"/>
             </template>
             <template v-for="widget in model.widgets" :key="widget.id" :elem="widget">
-                <component :is="widgetType(widget)" :widget="widget"
+                <component :is="widgetComponentType(widget)" :widget="widget"
                     :elem="findElement(widget.for)" :props="propsFor(findElement(widget.for))"
                     @action="onWidgetAction($event.elem ?? widget, $event)"/>
             </template>
@@ -36,35 +37,54 @@ svg .drag-move > line.hover {
 </style>
 
 <script lang="ts">
-import assert from 'assert';
-import { Vue, Component, toNative } from 'vue-facing-decorator';
+import { Vue, Component, Ref, toNative } from 'vue-facing-decorator';
 
-import WhiteboardContextMenu from './whiteboard-context-menu.vue';
+import WhiteboardContextMenu, { IWhiteboardContextMenu } from './whiteboard-context-menu.vue';
 import { DocumentModel as M, DocumentActions as A } from '../model';
 import { Point2D } from '../geom';
 
-import { CATALOG, CatalogEntry, ConjectureElement, Connector } from '../elements';
+import { CATALOG, CatalogEntry } from '../elements';
 import obj from './element-obj.vue';
 import conjecture from './elements/element-conjecture.vue';
-import connector from './element-connector.vue';
 import atable from './elements/element-table.vue';
 import computation from './elements/element-computation.vue';
+import stub from './elements/element-stub.vue';
 import WidgetInspector from './widgets/inspector.vue';
 import knob from './widgets/widget-knob.vue';
+
+import { SketchEditor } from 'sketchvg/src';
+
+
+const ELEMENT_TYPES = {obj, conjecture, atable, computation, stub},
+      WIDGET_TYPES = {WidgetInspector, knob};
 
 @Component({
     components: {
         WhiteboardContextMenu,
-        /* element types */
-        obj, conjecture, connector, atable, computation,
-        /* widget types */
-        WidgetInspector, knob
+        ...ELEMENT_TYPES,
+        ...WIDGET_TYPES
     },
     emits: ['action']
 })
 class IWhiteboardApp extends Vue {
     model: M.Document = {} as M.Document
-    $refs: any
+    @Ref svg: SVGSVGElement
+    @Ref contextMenu: IWhiteboardContextMenu
+
+    sketch: SketchEditor
+
+    mounted() {
+        this.sketch = new SketchEditor(this.svg);
+    }
+
+    updated() {
+        console.log('whiteboard updated')
+        for (let element of this.model.elements) {
+            let shape = (<any>element).shape;
+            if (shape && !this.sketch.has(shape))
+                this.sketch.add(shape);
+        }
+    }
 
     elemAction(elem: M.Element, action: A.Action) {
         switch (action.type) {
@@ -78,12 +98,12 @@ class IWhiteboardApp extends Vue {
     }
     elemMenu(elem: M.Element, action: A.MenuAction) {
         setTimeout(() =>
-            this.$refs.contextMenu.open(action.ev, {elem}), 0);
+            this.contextMenu.open(action.ev, {elem}), 0);
     }
-    elemType(elem: M.Element) {
-        return elem.type ?? 'conjecture';
+    elemComponentType(elem: M.Element) {
+        return Object.hasOwn(ELEMENT_TYPES, elem.type) ? elem.type : 'stub';
     }
-    widgetType(widget: M.Widget) {
+    widgetComponentType(widget: M.Widget) {
         return widget.type ?? 'widget-inspector';
     }
 
@@ -99,6 +119,7 @@ class IWhiteboardApp extends Vue {
 
     menuAction(ev: {type: string, for: MenuContext}) {
         switch (ev.type) {
+        case 'new-conn':  this.menuNew(CATALOG.connector, ev.for);    break;
         case 'new-conj':  this.menuNew(CATALOG.conjecture, ev.for);   break;
         case 'new-comp':  this.menuNew(CATALOG.computation, ev.for);  break;
         case 'new-tabl':  this.menuNew(CATALOG.atable, ev.for);       break;
@@ -119,8 +140,8 @@ class IWhiteboardApp extends Vue {
     }
     menuDuplicate(ctx: MenuContext) {
         var shift = (p: Point2D) => Point2D.add(p, DUPLICATE_OFFSET),
-            at = ctx.elem.at;
-        at = Array.isArray(at) ? at.map(shift) : shift(at);
+            at = shift(ctx.elem.at);
+        //at = Array.isArray(at) ? at.map(shift) : shift(at);
         var newElem = {...ctx.elem,
             id: this.model.mkId(), at
         } as M.Element;
@@ -144,7 +165,7 @@ class IWhiteboardApp extends Vue {
     onMouseDown(ev: MouseEvent) {
         if (ev.button == 2) {
             setTimeout(() =>
-                this.$refs.contextMenu.open(ev, {}), 0);
+                this.contextMenu.open(ev, {}), 0);
         }
     }
     onWidgetAction(elem: M.Element, action: A.Action) {

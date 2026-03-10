@@ -39,7 +39,7 @@ namespace DocumentModel {
     export interface Element {
         id: Id
         type: string
-        at: Point2D | Point2D[]
+        at: Point2D
         format?: ElementDisplayFormat
     }
 
@@ -138,12 +138,7 @@ namespace DocumentActions {
         var o = action.origin, g = action.gesture,
             pt = {x: o.x + g.to.x - g.from.x,
                   y: o.y + g.to.y - g.from.y};
-        if (Array.isArray(loc.elem.at)) {
-            loc.elem.at[action.ep] = pt;
-            loc.elem.at = loc.elem.at.slice(); // Vue reactivity issue?
-        }
-        else
-            loc.elem.at = pt;
+        loc.elem.at = pt;
     }
 
     function applyCreate(loc: ActionLocator, action: CreateAction) {
@@ -165,13 +160,15 @@ namespace DocumentActions {
     }
 
     function newFromCatalog(doc: M.Document, cat: CatalogEntry, at: Point2D, forElem?: M.Element) {
-        return {
+        let c = {
             id: doc.mkId(),
             type: cat.type,
             at,
-            for: forElem,
             ...cat.stencil
-        } as M.Element | M.Widget;
+        };
+        if (forElem) (c as M.Widget).for = forElem.id
+        cat.created?.(c);
+        return c as M.Element | M.Widget;
     }
 }
 

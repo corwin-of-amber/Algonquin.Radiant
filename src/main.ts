@@ -1,7 +1,4 @@
 import { Grammar, Rule } from 'nearley';
-import { Buffer } from 'safe-buffer';
-import { reactive, ref, Ref } from 'vue';
-Object.assign(window, {Buffer});  // Kremlin discrepancy
 
 import Vue from 'vue';
 
@@ -13,9 +10,8 @@ import { FileStore, LocalStore, StoreBase } from './store';
 
 import { PickLexer, PassThroughLexer } from './syntax/lexer';
 import { SpiralParser } from './syntax/parser';
-import { CATALOG, CatalogEntry } from './elements';
+import { CATALOG } from './elements';
 import { CATALOG as WCATALOG } from './widgets';
-import { Point2D } from './geom';
 
 
 class App {
@@ -30,8 +26,9 @@ class App {
     }
 
     restore() {
-        var model = this.store.load() || this._mkdoc();
-        return M.Document.promote(model);
+        var model = M.Document.promote(this.store.load() ?? this._mkdoc());
+        this.store.persist(model);
+        return model;
     }
 
     new() {

@@ -61,6 +61,10 @@ class LocalStore<Doc = any> implements StoreBase<Doc> {
         d && (localStorage[this.key] = this.ser.stringify(d));
     }
 
+    persist(d: Doc) {
+        window.addEventListener('beforeunload', () => this.save(d));
+    }
+
     delete() {
         delete localStorage[this.key];
     }

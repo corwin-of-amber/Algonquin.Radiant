@@ -1,21 +1,34 @@
+import EJSON from 'ejson';
 import { DocumentModel as M } from '../model';
 import { Point2D } from '../geom';
+import { Polyline } from 'sketchvg/src/shape';
 
 
 type Catalog = {[objtype: string]: CatalogEntry}
 type CatalogEntry = CatalogEntryProps & {type: string}
 type CatalogEntryProps = {
     stencil: {[prop: string]: any},
-    props?: {[prop: string]: PropDef}
+    props?: {[prop: string]: PropDef},
+    created?: (e: M.Element | M.Widget) => void
 }
 type PropDef = {format: string};
 
 
 const CATALOG: Catalog = mkCatalog({
+    'connector': {
+        stencil: {
+            shape: Polyline.makeSimple([{x: -10, y: 0}, {x: 20, y: 0}])
+        },
+        props: {},
+        created: (e: M.Element & {at: Point2D, shape: Polyline}) => {
+            e.shape = EJSON.clone(e.shape);
+            e.shape.translate(e.at);
+        }
+    },
     'conjecture': {
         stencil: {
             tex: 'x^yz'
-        },
+        }
     },
     'atable': {
         stencil: {
@@ -38,7 +51,7 @@ const CATALOG: Catalog = mkCatalog({
  */
 function mkCatalog(props: {[objtype: string]: CatalogEntryProps}): Catalog {
     for (let [k, v] of Object.entries(props as Catalog)) {
-        v.type = k;
+        v.type ??= k;
         if (v.stencil && !v.props)   // convenient
             v.props = mapValues(v.stencil, v => ({format: guessFormat(v)}));
     }
@@ -54,11 +67,6 @@ export interface ConjectureElement extends M.Element {
 export interface TableElement extends M.Element {
     type: 'atable'
     data: any[][]
-}
-
-export interface Connector extends M.Element {
-    type: 'connector'
-    at: [Point2D, Point2D]
 }
 
 

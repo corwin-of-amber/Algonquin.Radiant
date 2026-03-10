@@ -1,5 +1,6 @@
 <template>
     <context-menu ref="m">
+        <item name="new-conn">New Connector</item>
         <item name="new-conj">New Conjecture</item>
         <item name="new-comp">New Computation</item>
         <item name="new-tabl">New Table</item>
@@ -16,22 +17,24 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, toNative } from 'vue-facing-decorator';
+import { Vue, Component, Ref, toNative } from 'vue-facing-decorator';
 import ContextMenu from './context-menu/context-menu.vue';
 import Item from './context-menu/context-menu-item.vue';
+import { DocumentModel as M } from '../model';
 import { Point2D } from '../geom';
 
 @Component({
     components: {ContextMenu, Item}
 })
-class WhiteboardContextMenu extends Vue {
-    $refs: any
+class IWhiteboardContextMenu extends Vue {
+    @Ref m: any
     
-    open(ev: MouseEvent, whatFor: {at?: Point2D}) {
+    open(ev: MouseEvent, whatFor: {at?: Point2D, elem?: M.Element}) {
         whatFor.at ??= {x: ev.x, y: ev.y};
-        this.$refs.m.open(ev, whatFor);
+        this.m.open(ev, whatFor);
     }
 }
 
-export default toNative(WhiteboardContextMenu)
+export { IWhiteboardContextMenu }
+export default toNative(IWhiteboardContextMenu)
 </script>
