@@ -37,6 +37,7 @@ svg .drag-move > line.hover {
 </style>
 
 <script lang="ts">
+import { toRaw } from 'vue';
 import { Vue, Component, Ref, toNative } from 'vue-facing-decorator';
 
 import WhiteboardContextMenu, { IWhiteboardContextMenu } from './whiteboard-context-menu.vue';
@@ -53,6 +54,8 @@ import WidgetInspector from './widgets/inspector.vue';
 import knob from './widgets/widget-knob.vue';
 
 import { SketchEditor } from 'sketchvg/src';
+import { Shape2D } from 'sketchvg/src/shape';
+import { ShapeComponent } from 'sketchvg/src/components/shape';
 
 
 const ELEMENT_TYPES = {obj, conjecture, atable, computation, stub},
@@ -72,6 +75,7 @@ class IWhiteboardApp extends Vue {
     @Ref contextMenu: IWhiteboardContextMenu
 
     sketch: SketchEditor
+    sketchSync = new Map<M.Element, ShapeComponent>()
 
     mounted() {
         this.sketch = new SketchEditor(this.svg);
@@ -79,11 +83,7 @@ class IWhiteboardApp extends Vue {
 
     updated() {
         console.log('whiteboard updated')
-        for (let element of this.model.elements) {
-            let shape = (<any>element).shape;
-            if (shape && !this.sketch.has(shape))
-                this.sketch.add(shape);
-        }
+        this.sketchSync = this.syncSketch(this.sketchSync);
     }
 
     elemAction(elem: M.Element, action: A.Action) {
@@ -105,6 +105,31 @@ class IWhiteboardApp extends Vue {
     }
     widgetComponentType(widget: M.Widget) {
         return widget.type ?? 'widget-inspector';
+    }
+
+    /** Create a respective SketchVG component, if applicable */
+    elemSketch(elem: M.Element & {shape?: Shape2D}): ShapeComponent {
+        let shape = elem.shape;
+        if (shape && !this.sketch.has(shape)) {
+            return this.sketch.add(shape)
+                .on('mousedown', ev => {
+                    if (ev.$ev.button === 2)
+                        this.elemMenu(elem, {type: 'menu', ev: ev.$ev.originalEvent})
+                });
+        }
+    }
+    syncSketch(cur: typeof this.sketchSync) {
+        let next: typeof cur = new Map;
+        for (let element of toRaw(this.model.elements)) {
+            let comp = cur.get(element) ?? this.elemSketch(element);
+            cur.delete(element);
+            if (comp)
+                next.set(element, comp);
+        }
+        for (let comp of cur.values()) {
+            this.sketch.remove(comp);
+        }
+        return next;
     }
 
     findElement(id: M.Id) {
