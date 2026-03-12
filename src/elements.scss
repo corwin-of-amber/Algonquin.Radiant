@@ -1,0 +1,13 @@
+.element--obj {
+    .element--block {
+        border: 1px solid #888;
+        border-radius: 6px;
+        padding: 6px;
+        background: #fff8;
+        backdrop-filter: blur(2px);
+        width: fit-content;
+        max-width: 1000px;
+
+        font-family: 'Fira Sans', 'Open Sans', Arial, sans-serif;
+    }
+}

@@ -7,12 +7,12 @@ import ContextMenu from "./context-menu.vue";
 import { ContextmenuItem as Item } from "v-contextmenu";
 
 export default {
-    props: {'name': {}, 'enabled': {default: true}},
+    props: {'name': {}, data: {}, 'enabled': {default: true}},
     components: { Item },
     methods: {
         action() {
             var m = this.menu();
-            if (m) m.action({name: this.name});
+            if (m) m.action({name: this.name, data: this.data});
         },
         menu() {
             for (var v = this;

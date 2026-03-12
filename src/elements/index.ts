@@ -7,6 +7,7 @@ import { Polyline } from 'sketchvg/src/shape';
 type Catalog = {[objtype: string]: CatalogEntry}
 type CatalogEntry = CatalogEntryProps & {type: string}
 type CatalogEntryProps = {
+    description?: string
     stencil: {[prop: string]: any},
     props?: {[prop: string]: PropDef},
     created?: (e: M.Element | M.Widget) => void
@@ -25,12 +26,18 @@ const CATALOG: Catalog = mkCatalog({
             e.shape.translate(e.at);
         }
     },
+    'block': {
+        stencil: {
+            caption: "chimichanga"
+        }
+    },
     'conjecture': {
         stencil: {
             tex: 'x^yz'
         }
     },
     'atable': {
+        description: 'Table',
         stencil: {
             header: [undefined, 'A', 'B', 'C'],
             data: [[1, 'a', 'b', 'c'], [2, 'x', 'y', 'z']]
@@ -52,6 +59,7 @@ const CATALOG: Catalog = mkCatalog({
 function mkCatalog(props: {[objtype: string]: CatalogEntryProps}): Catalog {
     for (let [k, v] of Object.entries(props as Catalog)) {
         v.type ??= k;
+        v.description ??= k[0].toUpperCase() + k.slice(1)
         if (v.stencil && !v.props)   // convenient
             v.props = mapValues(v.stencil, v => ({format: guessFormat(v)}));
     }

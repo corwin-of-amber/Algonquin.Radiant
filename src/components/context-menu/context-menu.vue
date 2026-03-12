@@ -35,7 +35,7 @@ export default {
             this.$refs.m.hide();
         },
         action(ev) {
-            this.$emit('action', {type: ev.name, for: this.for});
+            this.$emit('action', {type: ev.name, for: this.for, data: ev.data});
         },
         onClose() {
             setTimeout(() => this.for = undefined, 0); /** @oops must happen after `action` handler */

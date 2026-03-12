@@ -2,33 +2,30 @@ import { Grammar, Rule } from 'nearley';
 
 import Vue from 'vue';
 
-import whiteboard, { IWhiteboardApp } from './components/whiteboard.vue';
-import './main.css';
-
 import { DocumentModel as M, DocumentActions as A } from './model';
 import { FileStore, LocalStore, StoreBase } from './store';
 
-import { PickLexer, PassThroughLexer } from './syntax/lexer';
-import { SpiralParser } from './syntax/parser';
-import { CATALOG } from './elements';
-import { CATALOG as WCATALOG } from './widgets';
+import whiteboard, { IWhiteboardApp } from './components/whiteboard.vue';
+import { Attach } from './elements/dependencies';
+import './main.css';
+import './elements.scss';
 
 
 class App {
     store = new LocalStore('document')
     view: IWhiteboardApp
+    attach: Attach
 
     constructor(container = 'body') {
         this.view = Vue.createApp(whiteboard, {
                 onAction: (loc: A.ActionLocator, action: A.Action) => this._viewAction(loc, action)
             }).mount(container) as IWhiteboardApp;
+        this.attach = new Attach(this.view);
         this.doc = this.restore();
     }
 
     restore() {
-        var model = M.Document.promote(this.store.load() ?? this._mkdoc());
-        this.store.persist(model);
-        return model;
+        return M.Document.promote(this.store.load() ?? this._mkdoc());
     }
 
     new() {
@@ -46,7 +43,15 @@ class App {
     }
 
     get doc(): M.Document { return this.view.model; }
-    set doc(d: M.Document) { this.view.model = d; }
+    set doc(d: M.Document) {
+        this.view.model = d;
+        this._docPersist?.cancel();
+        /* @note: model may contain some reactive sub-parts.
+         * It is imperative to persist the reactive (proxied) version thereof. */
+        this._docPersist = this.store.persist(this.doc);
+    }
+
+    _docPersist: {cancel: () => void}
 
     _mkdoc() {
         return new M.Document();
@@ -61,14 +66,18 @@ class App {
 function main() {
     var app = new App();
 
-    Object.assign(window, {app, CATALOG, WCATALOG, Vue});
+    Object.assign(window, { app, Vue });
 }
 
 
-/**
+/*
  * This is an experiment in defining a flexible syntax similar to Coq's
  * notation mechanism.
  */
+
+import { PickLexer, PassThroughLexer } from './syntax/lexer';
+import { SpiralParser } from './syntax/parser';
+
 function wip_flexiparse() {
     var lex;
     var lvl1 = {

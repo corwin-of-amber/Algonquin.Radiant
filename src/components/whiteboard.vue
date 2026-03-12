@@ -40,12 +40,15 @@ svg .drag-move > line.hover {
 import { toRaw } from 'vue';
 import { Vue, Component, Ref, toNative } from 'vue-facing-decorator';
 
-import WhiteboardContextMenu, { IWhiteboardContextMenu } from './whiteboard-context-menu.vue';
+import WhiteboardContextMenu,
+       { IWhiteboardContextMenu,
+         ActionEvent as MenuActionEvent } from './whiteboard-context-menu.vue';
 import { DocumentModel as M, DocumentActions as A } from '../model';
 import { Point2D } from '../geom';
 
 import { CATALOG, CatalogEntry } from '../elements';
 import obj from './element-obj.vue';
+import block from './elements/element-block.vue';
 import conjecture from './elements/element-conjecture.vue';
 import atable from './elements/element-table.vue';
 import computation from './elements/element-computation.vue';
@@ -58,7 +61,7 @@ import { Shape2D } from 'sketchvg/src/shape';
 import { ShapeComponent } from 'sketchvg/src/components/shape';
 
 
-const ELEMENT_TYPES = {obj, conjecture, atable, computation, stub},
+const ELEMENT_TYPES = {obj, block, conjecture, atable, computation, stub},
       WIDGET_TYPES = {WidgetInspector, knob};
 
 @Component({
@@ -82,7 +85,6 @@ class IWhiteboardApp extends Vue {
     }
 
     updated() {
-        console.log('whiteboard updated')
         this.sketchSync = this.syncSketch(this.sketchSync);
     }
 
@@ -120,11 +122,12 @@ class IWhiteboardApp extends Vue {
     }
     syncSketch(cur: typeof this.sketchSync) {
         let next: typeof cur = new Map;
-        for (let element of toRaw(this.model.elements)) {
-            let comp = cur.get(element) ?? this.elemSketch(element);
-            cur.delete(element);
+        for (let element of this.model.elements) {
+            let key = toRaw(element),
+                comp = cur.get(key) ?? this.elemSketch(element);
+            cur.delete(key);
             if (comp)
-                next.set(element, comp);
+                next.set(key, comp);
         }
         for (let comp of cur.values()) {
             this.sketch.remove(comp);
@@ -142,17 +145,14 @@ class IWhiteboardApp extends Vue {
         return cat?.props ?? {'value': {format: 'json'}};
     }
 
-    menuAction(ev: {type: string, for: MenuContext}) {
+    menuAction(ev: MenuActionEvent) {
         switch (ev.type) {
-        case 'new-conn':  this.menuNew(CATALOG.connector, ev.for);    break;
-        case 'new-conj':  this.menuNew(CATALOG.conjecture, ev.for);   break;
-        case 'new-comp':  this.menuNew(CATALOG.computation, ev.for);  break;
-        case 'new-tabl':  this.menuNew(CATALOG.atable, ev.for);       break;
+        case 'new-element': this.menuNew(ev.data.cat, ev.for); break;
         case 'cut':
-        case 'delete':    this.menuDelete(ev.for);   break;
-        case 'duplicate': this.menuDuplicate(ev.for); break;
-        case 'inspect':   this.menuInspect(ev.for);  break;
-        case 'copy-id':   this.menuCopyId(ev.for);  break;
+        case 'delete':      this.menuDelete(ev.for);    break;
+        case 'duplicate':   this.menuDuplicate(ev.for); break;
+        case 'inspect':     this.menuInspect(ev.for);   break;
+        case 'copy-id':     this.menuCopyId(ev.for);    break;
         }
     }
     menuNew(cat: CatalogEntry, ctx: MenuContext) {
@@ -164,12 +164,12 @@ class IWhiteboardApp extends Vue {
                    {type: 'delete'});
     }
     menuDuplicate(ctx: MenuContext) {
-        var shift = (p: Point2D) => Point2D.add(p, DUPLICATE_OFFSET),
-            at = shift(ctx.elem.at);
-        //at = Array.isArray(at) ? at.map(shift) : shift(at);
-        var newElem = {...ctx.elem,
-            id: this.model.mkId(), at
-        } as M.Element;
+        let shift = (p: Point2D) => Point2D.add(p, DUPLICATE_OFFSET),
+            newElem: M.Element = {
+                ...ctx.elem,
+                id: this.model.mkId(),
+                at: shift(ctx.elem.at)
+            };
         this.$emit('action', {doc: this.model},
                    {type: 'create', newElem});
     }
@@ -206,7 +206,7 @@ class IWhiteboardApp extends Vue {
     }
 }
 
-type MenuContext = {elem?: M.Element, at?: Point2D};
+type MenuContext = MenuActionEvent['for']
 
 const CONNECTOR_INIT_VEC = {x: 30, y: 30},
       INSPECTOR_OFFSET = {x: 40, y: -20},

@@ -1,6 +1,6 @@
 <template>
     <foreignObject :x="elem.at.x" :y="elem.at.y"
-        :class="dragClasses"
+        class="element--obj" :class="dragClasses"
         @mousedown.stop="onMouseDown" @contextmenu.prevent.stop>
         <slot/>
     </foreignObject>

@@ -11,6 +11,11 @@ namespace Point2D {
     export function add(...p: Point2D[]) {
         return p.reduce((p1, p2) => ({x: p1.x + p2.x, y: p1.y + p2.y}), O);
     }
+
+    export function sub(...p: Point2D[]) {
+        if (p.length == 0) return O;
+        return p.reduce((p1, p2) => ({x: p1.x - p2.x, y: p1.y - p2.y}));
+    }
 }
 
 export { XY, Point2D }

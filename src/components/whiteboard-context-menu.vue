@@ -1,9 +1,7 @@
 <template>
     <context-menu ref="m">
-        <item name="new-conn">New Connector</item>
-        <item name="new-conj">New Conjecture</item>
-        <item name="new-comp">New Computation</item>
-        <item name="new-tabl">New Table</item>
+        <item v-for="cat, key of elements" 
+            name="new-element" :data="{key, cat}">New {{ cat.description }}</item>
         <hr/>
         <item name="cut">Cut</item>
         <item name="copy" :enabled="false">Copy</item>
@@ -22,9 +20,10 @@ import ContextMenu from './context-menu/context-menu.vue';
 import Item from './context-menu/context-menu-item.vue';
 import { DocumentModel as M } from '../model';
 import { Point2D } from '../geom';
+import { CatalogEntry, CATALOG as ELEMENT_CATALOG } from '../elements';
 
 @Component({
-    components: {ContextMenu, Item}
+    components: { ContextMenu, Item }
 })
 class IWhiteboardContextMenu extends Vue {
     @Ref m: any
@@ -33,8 +32,23 @@ class IWhiteboardContextMenu extends Vue {
         whatFor.at ??= {x: ev.x, y: ev.y};
         this.m.open(ev, whatFor);
     }
+
+    get elements() { return ELEMENT_CATALOG; }
 }
 
-export { IWhiteboardContextMenu }
+interface ActionEvent {
+    type: string
+    for?: {
+        elem?: M.Element
+        at?: Point2D
+    }
+    data?: {
+        key: string
+        cat: CatalogEntry
+    }
+}
+
+
+export { IWhiteboardContextMenu, ActionEvent }
 export default toNative(IWhiteboardContextMenu)
 </script>
