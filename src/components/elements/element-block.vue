@@ -1,6 +1,6 @@
 <template>
     <obj :elem="elem">
-        <div class="element--block">
+        <div class="element--block element--boxed">
             {{ elem.caption }}
         </div>
     </obj>

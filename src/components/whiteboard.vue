@@ -55,6 +55,7 @@ import computation from './elements/element-computation.vue';
 import stub from './elements/element-stub.vue';
 import WidgetInspector from './widgets/inspector.vue';
 import knob from './widgets/widget-knob.vue';
+import drawer from './widgets/widget-drawer.vue';
 
 import { SketchEditor } from 'sketchvg/src';
 import { Shape2D } from 'sketchvg/src/shape';
@@ -62,7 +63,7 @@ import { ShapeComponent } from 'sketchvg/src/components/shape';
 
 
 const ELEMENT_TYPES = {obj, block, conjecture, atable, computation, stub},
-      WIDGET_TYPES = {WidgetInspector, knob};
+      WIDGET_TYPES = {WidgetInspector, knob, drawer};
 
 @Component({
     components: {
@@ -103,7 +104,8 @@ class IWhiteboardApp extends Vue {
             this.contextMenu.open(action.ev, {elem}), 0);
     }
     elemComponentType(elem: M.Element) {
-        return Object.hasOwn(ELEMENT_TYPES, elem.type) ? elem.type : 'stub';
+        return Object.hasOwn(ELEMENT_TYPES, elem.type) ||
+               Object.hasOwn(WIDGET_TYPES, elem.type) ? elem.type : 'stub';
     }
     widgetComponentType(widget: M.Widget) {
         return widget.type ?? 'widget-inspector';

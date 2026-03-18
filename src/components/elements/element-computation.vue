@@ -1,8 +1,10 @@
 <template>
     <obj :elem="elem">
-        <span :dummy="value"></span>
-        <element-default :elem="elem"/>
-        <span class="errormsg" v-if="elem.err" v-text="elem.err"></span>
+        <div class="element--boxed">
+            <span :dummy="value"></span>
+            <element-default :elem="elem"/>
+            <span class="errormsg" v-if="elem.err" v-text="elem.err"></span>
+        </div>
     </obj>
 </template>
 
@@ -28,7 +30,7 @@ class ElementComputation extends Vue {
     elem = undefined
     _computation: ReactiveComputation
 
-    $root: ComponentPublicInstance & {model: any}
+    declare $root: ComponentPublicInstance & {model: any}
     
     created() {
         this._computation = new ReactiveComputation(this.$root.model);

@@ -47,6 +47,17 @@ const CATALOG: Catalog = mkCatalog({
         stencil: {
             code: 'return {};'
         }
+    },
+    'knob': {
+        stencil: {}
+    },
+    'drawer': {
+        stencil: {
+            expand: true,
+            content: {
+                value: [{}]
+            }
+        }
     }
 });
 

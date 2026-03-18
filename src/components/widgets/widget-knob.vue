@@ -1,5 +1,5 @@
 <template>
-    <circle class="widget--knob" :cx="widget.at.x" :cy="widget.at.y"
+    <circle class="widget--knob" :cx="elem.at.x" :cy="elem.at.y"
         :class="dragClasses"
         @mousedown.stop="onMouseDown" @contextmenu.prevent.stop/>
 </template>
@@ -14,17 +14,17 @@ circle.widget--knob {
 </style>
 
 <script lang="ts">
-import { WidgetDragBuddy } from './drag';
+import { ElementDragBuddy } from '../elements/drag';
 
 
 export default {
-    props: ['widget', 'elem'],
+    props: ['elem'],
     data: () => ({dragState: undefined}),
     computed: {
-        dragClasses() { return WidgetDragBuddy.classes(this.dragState); }
+        dragClasses() { return ElementDragBuddy.classes(this.dragState); }
     },
     mounted() {
-        this._drag = new WidgetDragBuddy(this);
+        this._drag = new ElementDragBuddy(this);
     },
     methods: {
         onMouseDown(ev: MouseEvent) {
