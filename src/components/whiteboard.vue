@@ -8,11 +8,13 @@
                 <component :is="elemComponentType(elem)" :elem="elem"
                     @action="elemAction(elem, $event)"/>
             </template>
+            <!--
             <template v-for="widget in model.widgets" :key="widget.id" :elem="widget">
                 <component :is="widgetComponentType(widget)" :widget="widget"
                     :elem="findElement(widget.for)" :props="propsFor(findElement(widget.for))"
                     @action="onWidgetAction($event.elem ?? widget, $event)"/>
             </template>
+            -->
         </svg>
         <whiteboard-context-menu ref="contextMenu" @action="menuAction"/>
     </div>
@@ -89,7 +91,8 @@ class IWhiteboardApp extends Vue {
         this.sketchSync = this.syncSketch(this.sketchSync);
     }
 
-    elemAction(elem: M.Element, action: A.Action) {
+    elemAction(elem: M.Element, action: A.Action & {elem?: M.Element}) {
+        elem = action.elem ?? elem;
         switch (action.type) {
         case 'select':  this.elemSelect(elem, action as A.SelectAction);   break;
         case 'menu':    this.elemMenu(elem, action as A.MenuAction);       break;
@@ -140,12 +143,6 @@ class IWhiteboardApp extends Vue {
     findElement(id: M.Id) {
         return this.model.findId(id);
     }
-    propsFor(elem: M.Element) {
-        if (!elem) return {};
-
-        var cat = CATALOG[elem.type];
-        return cat?.props ?? {'value': {format: 'json'}};
-    }
 
     menuAction(ev: MenuActionEvent) {
         switch (ev.type) {
@@ -179,10 +176,11 @@ class IWhiteboardApp extends Vue {
         var at = ctx.at || ctx.elem.at as Point2D;
         var newElem = {
             id: this.model.mkId(),
-            at: Point2D.add(at, INSPECTOR_OFFSET), for: ctx.elem.id
+            at: Point2D.add(at, INSPECTOR_OFFSET),
+            refs: {for: ctx.elem.id}
         };
         this.$emit('action', {doc: this.model},
-                                {type: 'create', newElem})
+                             {type: 'create', newElem})
     }
     menuCopyId(ctx: MenuContext) {
         console.log(ctx.elem.id);

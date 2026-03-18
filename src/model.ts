@@ -142,10 +142,10 @@ namespace DocumentActions {
     }
 
     function applyCreate(loc: ActionLocator, action: CreateAction) {
-        var e = (<CreateDirectAction>action).newElem ??
-                    newFromCatalog(loc.doc, (<CreateFromCatalogAction>action).cat, (<CreateFromCatalogAction>action).at),
-            l = M.isWidget(e) ? loc.doc.widgets : loc.doc.elements;
-        l.push(e);
+        let catAction = <CreateFromCatalogAction>action,
+            e = (<CreateDirectAction>action).newElem ??
+                    newFromCatalog(loc.doc, catAction.cat, catAction.at);
+        loc.doc.elements.push(e);
     }
 
     function applyDelete(loc: ActionLocator, action: DeleteAction) {

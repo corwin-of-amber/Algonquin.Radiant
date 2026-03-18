@@ -57,7 +57,8 @@ const CATALOG: Catalog = mkCatalog({
             content: {
                 value: [{}]
             }
-        }
+        },
+        props: {content: {format: 'json'}}
     }
 });
 

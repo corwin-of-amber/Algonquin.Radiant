@@ -28,6 +28,7 @@ import { EditorView, ViewPlugin } from '@codemirror/view';
 export default {
     props: {elem: Object, prop: String, format: String,
             showName: {type: Boolean, default: true}},
+    emits: ['action'],
     mounted() {
         var state = EditorState.create({
             doc: this.unparse(this.elem?.[this.prop]),

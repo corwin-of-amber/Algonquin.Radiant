@@ -10,6 +10,7 @@
 import { Vue, Component, Prop, toNative } from 'vue-facing-decorator';
 import { DocumentModel as M, DocumentActions as A } from '../../model';
 import { Point2D } from '../../geom';
+import { StableObj } from '../../infra/reactivity';
 
 import knob from './widget-knob.vue'
 import value, { Props as ValueProps } from '../elements/element-value.vue';
@@ -27,23 +28,25 @@ class IDrawerWidget extends Vue {
     @Prop elem: M.Element & Props
     offset: Point2D = {x: -10, y: +10}
 
+    _subelem = new StableObj<M.Element & ValueProps>()
+
     toggle() {
         this.elem.expand = !this.elem.expand;
     }
 
     get subelem(): M.Element & ValueProps {
-        let at = this.elem.at;
-        return {
+        return this._subelem.set({
             id: `${this.elem.id}[1]`,
             type: 'block',
             at: Point2D.add(this.elem.at, this.offset),
             ...this.elem.content
-        };
+        });
     }
 
     adjust(elem: M.Element, action: A.MoveAction) {
-        action.origin =
-            Point2D.add(action.origin, Point2D.sub(this.elem.at, elem.at));
+        if (action.origin)
+            action.origin = Point2D.add(action.origin,
+                    Point2D.sub(this.elem.at, elem.at));
         return action;
     }
 }

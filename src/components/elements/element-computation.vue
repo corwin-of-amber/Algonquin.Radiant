@@ -2,7 +2,7 @@
     <obj :elem="elem">
         <div class="element--boxed">
             <span :dummy="value"></span>
-            <element-default :elem="elem"/>
+            <value-default :elem="elem"/>
             <span class="errormsg" v-if="elem.err" v-text="elem.err"></span>
         </div>
     </obj>
@@ -20,10 +20,10 @@ import { ComponentPublicInstance } from 'vue';
 import { Component, Vue, Prop, toNative } from 'vue-facing-decorator';
 import { ReactiveComputation } from '../../elements/computation';
 import Obj from '../element-obj.vue';
-import ElementDefault from './element-default.vue';
+import ValueDefault from './value-default.vue';
 
 @Component({
-    components: { Obj, ElementDefault }
+    components: { Obj, ValueDefault }
 })
 class ElementComputation extends Vue {
     @Prop

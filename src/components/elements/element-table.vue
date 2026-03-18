@@ -6,7 +6,7 @@
             </tr>
             <tr v-for="row,$i in elem.data" :key="$i">
                 <td v-for="cell,$j in row" :key="$j">
-                    <component :is="dataElement ?? 'element-default'"
+                    <component :is="dataElement ?? 'value-default'"
                                :elem="{value: cell}"/>
                 </td>
             </tr>
@@ -16,7 +16,7 @@
 
 <script>
 import Obj from '../element-obj.vue';
-import ElementDefault from './element-default.vue';
+import ValueDefault from './value-default.vue';
 
 
 export default {
@@ -32,7 +32,7 @@ export default {
             return key;
         }
     },
-    components: { Obj, ElementDefault }
+    components: { Obj, ValueDefault }
 }
 </script>
 
