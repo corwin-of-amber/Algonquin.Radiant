@@ -1,21 +1,23 @@
 <template>
     <context-menu ref="m">
-        <item v-for="cat, key of elements" 
-            name="new-element" :data="{key, cat}">New {{ cat.description }}</item>
+        <submenu title="New...">
+            <item v-for="cat, key of elements" 
+                name="new-element" :data="{key, cat}">{{ cat.description }}</item>
+        </submenu>
+        <item name="inspect">Show Inspector...</item>
+        <item name="copy-id">Copy Id</item>
         <hr/>
         <item name="cut">Cut</item>
         <item name="copy" :enabled="false">Copy</item>
         <item name="paste" :enabled="false">Paste</item>
         <item name="duplicate">Duplicate</item>
         <item name="delete">Delete</item>
-        <hr/>
-        <item name="inspect">Show Inspector...</item>
-        <item name="copy-id">Copy Id</item>
     </context-menu>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Ref, toNative } from 'vue-facing-decorator';
+import { ContextmenuSubmenu as Submenu } from 'v-contextmenu';
 import ContextMenu from './context-menu/context-menu.vue';
 import Item from './context-menu/context-menu-item.vue';
 import { DocumentModel as M } from '../model';
@@ -23,7 +25,7 @@ import { Point2D } from '../geom';
 import { CatalogEntry, CATALOG as ELEMENT_CATALOG } from '../elements';
 
 @Component({
-    components: { ContextMenu, Item }
+    components: { ContextMenu, Submenu, Item }
 })
 class IWhiteboardContextMenu extends Vue {
     @Ref m: any

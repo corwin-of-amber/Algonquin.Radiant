@@ -1,6 +1,6 @@
 <template>
-    <obj :elem="elem" @action="$emit('action', $event)">
-        <div class="sattelite-inspector" :class="{'with-names': isWithNames()}">
+    <obj :elem="elem" @action="$emit('action', $event)" class="widget--inspector">
+        <div class="sattelite element--boxed" :class="{'with-names': isWithNames()}">
             <prop-editor v-for="def, name in props" :key="name"
                 :elem="ref" :prop="name" :format="def.format"
                 :showName="isWithNames()"
@@ -10,21 +10,8 @@
 </template>
 
 <style scoped>
-div.sattelite-inspector {
-    width: 15em;
-    border: 1px solid #888;
-    border-radius: 6px;
-    padding: 6px;
-    background: #fff8;
-    backdrop-filter: blur(2px);
-}
-
-div.sattelite-inspector.with-names {
+div.sattelite.with-names {
     padding-top: 3px;
-}
-
-:deep(.drag-move) div.sattelite-inspector {
-    background: #fdd;
 }
 
 div :deep(.inspector--prop-name) {
@@ -33,10 +20,10 @@ div :deep(.inspector--prop-name) {
 </style>
 
 <style>
-.drag-move div.sattelite-inspector {
+.drag-move div.sattelite {
     background: #efe8;
 }
-.drag-move div.sattelite-inspector > * {
+.drag-move div.sattelite > * {
     opacity: 0.7;
 }
 </style>

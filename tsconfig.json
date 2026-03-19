@@ -2,10 +2,10 @@
     "compilerOptions": {
       "target": "es2022",
       "module": "esnext",
-      "lib": ["ES2022", "ES2022.Object", "DOM"],
+      "lib": ["ES2022", "ES2022.Object", "DOM", "DOM.Iterable"],
       "moduleResolution": "node",
       "esModuleInterop": true,
       "downlevelIteration": true,
       "experimentalDecorators": true
     }
-  }
+}

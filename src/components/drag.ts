@@ -5,6 +5,7 @@ abstract class DragBuddy<V extends Vue.ComponentPublicInstance & {dragState: {c:
     o: V
     _dragGesture: {origin: A, from: any}
     _moveh: (ev: MouseEvent) => void;
+    moved = false
 
     constructor(o: V) { this.o = o; }
 
@@ -16,6 +17,10 @@ abstract class DragBuddy<V extends Vue.ComponentPublicInstance & {dragState: {c:
         this._moveh = (ev: MouseEvent) => this.move(ev);
         document.addEventListener('mousemove', this._moveh);
         document.addEventListener('mouseup', ev => this.end(ev), {once: true});
+        // block `click` events at the end of drag actions
+        this.o.$el.addEventListener('click', (ev: MouseEvent) => {
+            if (this.moved) ev.stopImmediatePropagation();
+        }, {capture: true});
     }
 
     move(ev: MouseEvent) {
@@ -25,11 +30,13 @@ abstract class DragBuddy<V extends Vue.ComponentPublicInstance & {dragState: {c:
             ...g.origin,
             gesture: {from: g.from, to: {x: ev.x, y: ev.y}}
         });
+        this.moved = true;
     }
 
     end(ev: MouseEvent) {
         this.o.dragState = undefined;
         document.removeEventListener('mousemove', this._moveh);
+        setTimeout(() => this.moved = false, 1);
     }
 
     static classes(dragState?: {c: string}) {

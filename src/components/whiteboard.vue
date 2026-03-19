@@ -8,13 +8,6 @@
                 <component :is="elemComponentType(elem)" :elem="elem"
                     @action="elemAction(elem, $event)"/>
             </template>
-            <!--
-            <template v-for="widget in model.widgets" :key="widget.id" :elem="widget">
-                <component :is="widgetComponentType(widget)" :widget="widget"
-                    :elem="findElement(widget.for)" :props="propsFor(findElement(widget.for))"
-                    @action="onWidgetAction($event.elem ?? widget, $event)"/>
-            </template>
-            -->
         </svg>
         <whiteboard-context-menu ref="contextMenu" @action="menuAction"/>
     </div>
@@ -48,7 +41,7 @@ import WhiteboardContextMenu,
 import { DocumentModel as M, DocumentActions as A } from '../model';
 import { Point2D } from '../geom';
 
-import { CATALOG, CatalogEntry } from '../elements';
+import { CatalogEntry } from '../elements';
 import obj from './element-obj.vue';
 import block from './elements/element-block.vue';
 import conjecture from './elements/element-conjecture.vue';
@@ -89,6 +82,7 @@ class IWhiteboardApp extends Vue {
 
     updated() {
         this.sketchSync = this.syncSketch(this.sketchSync);
+        this.arrange();
     }
 
     elemAction(elem: M.Element, action: A.Action & {elem?: M.Element}) {
@@ -109,9 +103,6 @@ class IWhiteboardApp extends Vue {
     elemComponentType(elem: M.Element) {
         return Object.hasOwn(ELEMENT_TYPES, elem.type) ||
                Object.hasOwn(WIDGET_TYPES, elem.type) ? elem.type : 'stub';
-    }
-    widgetComponentType(widget: M.Widget) {
-        return widget.type ?? 'widget-inspector';
     }
 
     /** Create a respective SketchVG component, if applicable */
@@ -138,6 +129,12 @@ class IWhiteboardApp extends Vue {
             this.sketch.remove(comp);
         }
         return next;
+    }
+
+    /** Control Z order */
+    arrange() {
+        // bring widgets to front
+        this.svg.append(...this.svg.querySelectorAll(":scope > .widget--inspector"));
     }
 
     findElement(id: M.Id) {
@@ -176,6 +173,7 @@ class IWhiteboardApp extends Vue {
         var at = ctx.at || ctx.elem.at as Point2D;
         var newElem = {
             id: this.model.mkId(),
+            type: 'WidgetInspector',
             at: Point2D.add(at, INSPECTOR_OFFSET),
             refs: {for: ctx.elem.id}
         };
