@@ -44,6 +44,17 @@ class Attach {
         }
     }
 
+    apply(instructions: Instruction[]) {
+        let o: object = this;
+        for (let [op, ...args] of instructions) {
+            if (typeof o[op] !== 'function')
+                throw new Error(`invalid operation '${op}' (in: ${JSON.stringify(instructions)})`);
+            args = args.map(a => a.$ ? this.view.model.findId(a.$) : a);
+            o = o[op](...args);
+        }
+        return o;
+    }
+
     /* helper functions */
 
     viaOffset(from: () => Point2D, to: Point2D, poke = () => {}) {
@@ -62,9 +73,12 @@ class Attach {
 }
 
 
+type Instruction = [string, ...any]
+
+
 function as<T>(c: ComputedRef<T>): T {
     return c as any;
 }
 
 
-export { Attach }
+export { Attach, Instruction }

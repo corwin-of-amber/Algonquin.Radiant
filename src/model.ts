@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import { CatalogEntry } from './elements';
+import { Instruction } from './elements/dependencies';
 import { Point2D } from './geom';
 
 
@@ -7,7 +8,7 @@ namespace DocumentModel {
 
     export class Document {
         elements: Element[] = []
-        widgets: Widget[] = []
+        dataflow: [string, ...Instruction[]][] = []
 
         mkId() {
             do {
@@ -23,7 +24,7 @@ namespace DocumentModel {
         static from(props: Document.Props) {
             var d = new Document();
             d.elements = props.elements;
-            d.widgets = props.widgets;
+            d.dataflow = props.dataflow;
             return d;
         }
 
@@ -33,7 +34,10 @@ namespace DocumentModel {
     }
 
     export namespace Document {
-        export type Props = {elements: Element[], widgets: Widget[]};
+        export type Props = {
+            elements: Element[],
+            dataflow: [string, ...Instruction[]][]
+        }
     }
 
     export interface Element {
@@ -59,14 +63,6 @@ namespace DocumentModel {
 
     export type Sizer = Point2D & {
         stretch: boolean | {x: boolean, y: boolean}
-    }
-
-    export function isWidget(e: Element): e is Widget {
-        return !!(<Widget>e).for;
-    }
-
-    export function isEphemeralWidget(e: Element): e is Widget {
-        return isWidget(e) && !!(<EphemeralWidget>e).ephemeral;
     }
 
 }
@@ -149,7 +145,7 @@ namespace DocumentActions {
     }
 
     function applyDelete(loc: ActionLocator, action: DeleteAction) {
-        var l = M.isWidget(loc.elem) ? loc.doc.widgets : loc.doc.elements,
+        var l = loc.doc.elements,
             i = l.indexOf(loc.elem);
         if (i >= 0)
             l.splice(i, 1);

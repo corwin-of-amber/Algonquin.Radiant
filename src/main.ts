@@ -22,6 +22,7 @@ class App {
             }).mount(container) as IWhiteboardApp;
         this.attach = new Attach(this.view);
         this.doc = this.restore();
+        this._dataflow();
     }
 
     restore() {
@@ -60,6 +61,16 @@ class App {
     _viewAction(loc: A.ActionLocator, action: A.Action) {
         A.applyAction(loc, action);
         this.store.save(this.view.model);
+    }
+
+    _dataflow() {
+        for (let [category, ...spec] of this.doc.dataflow) {
+            switch (category) {
+                case 'attach': this.attach.apply(spec); break;
+                default:
+                    console.warn(`invalid dataflow category '${category}`);
+            }
+        }
     }
 }
 
