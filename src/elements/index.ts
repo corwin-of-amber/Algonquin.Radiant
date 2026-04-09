@@ -12,7 +12,7 @@ type CatalogEntryProps = {
     props?: {[prop: string]: PropDef},
     created?: (e: M.Element | M.Widget) => void
 }
-type PropDef = {format: string};
+type PropDef = {format: string, source?: string};
 
 
 const CATALOG: Catalog = mkCatalog({
@@ -58,7 +58,7 @@ const CATALOG: Catalog = mkCatalog({
                 value: [{}]
             }
         },
-        props: {content: {format: 'json'}}
+        props: {content: {format: 'dynamic', source: 'source'}}
     }
 });
 

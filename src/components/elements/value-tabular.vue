@@ -17,7 +17,14 @@ class IValueTabular extends Vue {
     @Ref inner: ITabular
 
     gridData(value: any) {
-        return data.fromObjects(value);
+        try {
+            if (value === undefined) return [];
+            return data.fromObjects(value);
+        }
+        catch (e) {
+            console.error(e);
+            return [];
+        }
     }
 }
 

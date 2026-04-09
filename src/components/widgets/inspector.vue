@@ -2,7 +2,7 @@
     <obj :elem="elem" @action="$emit('action', $event)" class="widget--inspector">
         <div class="sattelite element--boxed" :class="{'with-names': isWithNames()}">
             <prop-editor v-for="def, name in props" :key="name"
-                :elem="ref" :prop="name" :format="def.format"
+                :elem="ref" :prop="name" :format="def.format" :source="def.source"
                 :showName="isWithNames()"
                 @action="(e, a) => $emit('action', e, a)"/>
         </div>
