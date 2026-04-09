@@ -6,7 +6,7 @@ import { DocumentModel as M, DocumentActions as A } from './model';
 import { FileStore, LocalStore, StoreBase } from './store';
 
 import whiteboard, { IWhiteboardApp } from './components/whiteboard.vue';
-import { Attach, Compute } from './elements/dependencies';
+import { ControlPlane } from './elements/dependencies';
 import './main.css';
 import './elements.scss';
 
@@ -14,17 +14,14 @@ import './elements.scss';
 class App {
     store = new LocalStore('document')
     view: IWhiteboardApp
-    attach: Attach
-    compute: Compute
+    control: ControlPlane
 
     constructor(container = 'body') {
         this.view = Vue.createApp(whiteboard, {
                 onAction: (loc: A.ActionLocator, action: A.Action) => this._viewAction(loc, action)
             }).mount(container) as IWhiteboardApp;
-        this.attach = new Attach(this.view).withQualifiedPath(['attach']);
-        this.compute = new Compute(this.view).withQualifiedPath(['compute']);
         this.doc = this.restore();
-        this._dataflow();
+        this.control = new ControlPlane(this.view);
     }
 
     restore() {
@@ -64,18 +61,8 @@ class App {
         A.applyAction(loc, action);
         this.store.save(this.view.model);
     }
-
-    _dataflow() {
-        for (let [category, ...spec] of this.doc.dataflow) {
-            switch (category) {
-                case 'attach': this.attach.apply(spec); break;
-                case 'compute': this.compute.apply(spec); break;
-                default:
-                    console.warn(`invalid dataflow category '${category}'`);
-            }
-        }
-    }
 }
+
 
 function main() {
     var app = new App();

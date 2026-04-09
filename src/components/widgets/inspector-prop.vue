@@ -51,7 +51,6 @@ class IInspectorProperty extends Vue {
 
     mounted() {
         let source = this.dsource?.payload;
-        console.log(this.format, this.source, source);
 
         var state = EditorState.create({
             doc: source ?? this.unparse(this.elem?.[this.prop]),

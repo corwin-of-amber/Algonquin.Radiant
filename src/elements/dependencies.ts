@@ -54,6 +54,33 @@ class ControlCommon {
     }
 }
 
+class ControlPlane extends ControlCommon {
+    attach: Attach
+    compute: Compute
+
+    constructor(view: IWhiteboardApp) {
+        super(view);
+        this.attach = new Attach(view).withQualifiedPath(['attach']);
+        this.compute = new Compute(view).withQualifiedPath(['compute']);
+
+        if (this.view.model) this.initiate();
+    }
+
+    initiate() {
+        for (let [category, ...spec] of this.view.model.dataflow ?? []) {
+            try {
+                switch (category) {
+                    case 'attach': this.attach.apply(spec); break;
+                    case 'compute': this.compute.apply(spec); break;
+                    default:
+                        console.warn(`invalid dataflow category '${category}'`);
+                }
+            }
+            catch (e) { console.warn(e); }
+        }
+    }
+}
+
 /**
  * Used to associate elements in a way that moving one of them
  * immediately affects the other.
@@ -161,4 +188,4 @@ function as<T>(c: ComputedRef<T>): T {
 }
 
 
-export { Attach, Compute, Instruction }
+export { ControlPlane, Attach, Compute, Instruction }
