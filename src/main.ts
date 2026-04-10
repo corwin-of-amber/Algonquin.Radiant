@@ -64,10 +64,17 @@ class App {
 }
 
 
+import scratch0 from '../samples/scratch/scratch0';
+
 function main() {
     var app = new App();
 
-    Object.assign(window, { app, Vue });
+    app.control.compute.scope = {scratch0};
+
+    let c = app.control,
+        $$ = (id: string) => app.doc.findId(id)
+
+    Object.assign(window, { app, Vue, c, $$ });
 }
 
 

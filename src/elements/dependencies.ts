@@ -79,6 +79,10 @@ class ControlPlane extends ControlCommon {
             catch (e) { console.warn(e); }
         }
     }
+
+    commit(instruction: [string, ...Instruction[]]) {
+        this.view.model.dataflow.push(instruction);
+    }
 }
 
 /**
@@ -176,7 +180,7 @@ class Compute extends ControlCommon {
 }
 
 
-type Instruction = [string, ...any]
+type Instruction = [string, ...any[]]
 
 // `content` is somewhat of a wrinkle
 type ValueSource = Value & {content?: Value}
