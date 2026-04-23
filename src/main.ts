@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Grammar, Rule } from 'nearley';
 
 import Vue from 'vue';
@@ -21,7 +22,7 @@ class App {
                 onAction: (loc: A.ActionLocator, action: A.Action) => this._viewAction(loc, action)
             }).mount(container) as IWhiteboardApp;
         this.doc = this.restore();
-        this.control = new ControlPlane(this.view);
+        this.control = new ControlPlane(this.view, {deferred: true});
     }
 
     restore() {
@@ -69,12 +70,13 @@ import scratch0 from '../samples/scratch/scratch0';
 function main() {
     var app = new App();
 
-    app.control.compute.scope = {scratch0};
+    //app.control.compute.scope = {scratch0};
+    app.control.initiate({scratch0});
 
-    let c = app.control,
+    let c = app.control, e = app.doc.elements,
         $$ = (id: string) => app.doc.findId(id)
 
-    Object.assign(window, { app, Vue, c, $$ });
+    Object.assign(window, { app, Vue, _, c, e, $$ });
 }
 
 

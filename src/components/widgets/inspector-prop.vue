@@ -74,12 +74,15 @@ class IInspectorProperty extends Vue {
         switch (this.format) {
             case 'json':
                 return rJSON.prettyPrint(rJSON.Options.RJsonPretty, JSON.stringify(value));
-            case 'string':
+            case 'text':
             case 'number':
                 return `${value}`;
 
             case 'dynamic':
                 return rJSON.prettyPrint(rJSON.Options.RJsonPretty, JSON.stringify(value));
+
+            default:
+                return `[?] unrecognized format '${this.format}'`
         }
     }
 
@@ -91,6 +94,9 @@ class IInspectorProperty extends Vue {
 
             case 'dynamic':
                 return this.interp.eval(value, this.dsource.format, this.elem?.[this.prop]?.value);
+
+            default:
+                throw new Error(`[?] unrecognized format '${this.format}'`)
         }
     }
 

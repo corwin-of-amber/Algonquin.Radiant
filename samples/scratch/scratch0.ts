@@ -20,10 +20,20 @@ export default function entry() {
                 text: ' '
             })))
 
+        verbs = {
+            rt: () => $.at[0]++
+        }
+
     }
 
     let cells: {[k: string]: Cell<any[]>} = Meta.intoCells(new Scratch0);
     Object.assign($, Object.fromEntries(Object.entries(cells).map(([k, v]) => [k, v.value])));
+
+    $.clone = () => {
+        let c = entry();
+        c.at = $.at;
+        return c;
+    }
 
     return $;
 }

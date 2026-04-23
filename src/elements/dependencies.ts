@@ -1,4 +1,4 @@
-import { ComputedRef, computed, ref, reactive } from 'vue';
+import { ComputedRef, computed, ref, reactive, ComponentPublicInstance } from 'vue';
 import { Polyline } from 'sketchvg/src/shape';
 import { ShapeComponentBase } from 'sketchvg/src/components/shape';
 
@@ -36,10 +36,16 @@ class ControlCommon {
         let o: object = this;
         for (let [op, ...args] of instructions) {
             if (typeof o[op] !== 'function')
-                throw new Error(`invalid operation '${op}' (in: ${JSON.stringify(instructions)})`);
-            args = args.map(a => a.$ ? this.view.model.findId(a.$) :
-                                 a['@'] ? this.func(a['@']) : a);
-            o = o[op](...args);
+                throw new Error(`invalid operation '${op}' (in: )`);
+
+            try {
+                args = args.map(a => a.$ ? this.getElement(a.$) :
+                                    a['@'] ? this.func(a['@']) : a);
+                o = o[op](...args);
+            }
+            catch (e) {
+                throw new Error(`${e.message} (in: ${JSON.stringify(instructions)})`);
+            }
         }
         return o;
     }
@@ -52,21 +58,39 @@ class ControlCommon {
         /* unsafe */
         return new Function(`return (${code})`)();
     }
+
+    getElement(id: M.Id) {
+        let e = this.view.model.findId(id);
+        if (!e) throw new Error(`stale element '${id}'`);
+        return e;
+    }
+
+    getUI(element: M.Element) {
+        return this.view.uiMap?.get(element.id);
+    }
 }
 
 class ControlPlane extends ControlCommon {
     attach: Attach
     compute: Compute
 
-    constructor(view: IWhiteboardApp) {
+    options: {
+        scope?: object
+        deferred?: boolean
+    }
+
+    constructor(view: IWhiteboardApp, options: ControlPlane['options'] = {}) {
         super(view);
         this.attach = new Attach(view).withQualifiedPath(['attach']);
         this.compute = new Compute(view).withQualifiedPath(['compute']);
 
-        if (this.view.model) this.initiate();
+        if (options.scope) this.compute.scope = options.scope;
+        if (!options.deferred && this.view.model) this.initiate();
     }
 
-    initiate() {
+    initiate(scope?: object) {
+        if (scope) this.compute.scope = scope;
+
         for (let [category, ...spec] of this.view.model.dataflow ?? []) {
             try {
                 switch (category) {
@@ -76,7 +100,7 @@ class ControlPlane extends ControlCommon {
                         console.warn(`invalid dataflow category '${category}'`);
                 }
             }
-            catch (e) { console.warn(e); }
+            catch (e) { console.warn('[dataflow] in', category, spec, e); }
         }
     }
 
@@ -140,9 +164,9 @@ class Compute extends ControlCommon {
     value(of: M.Element & ValueSink) {
         let put = this.sink(of), pfx = this.qualify([['value', {$:of.id}]]);
         return {
-            fromValue: (from: M.Element & ValueSource, func: (input: any) => any) => {
-                let get = this.source(from);
-                put(as(computed(() => this.eval(() => func(get().value)))));
+            fromValue: (from: M.Element & ValueSource, func: (input: any, ui?: ComponentPublicInstance) => any) => {
+                let get = this.source(from), getUI = () => this.getUI(from);
+                put(as(computed(() => this.eval(() => func(get().value, getUI())))));
                 return [...pfx, ['fromValue', {$:from.id}, {'@':func.toString()}]];
             },
             fromFuncValue: (func: M.Element & ValueSource, ...args: (M.Element & ValueSource)[]) => {

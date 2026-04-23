@@ -6,6 +6,7 @@
             <circle r="400" cx="500" cy="500"/>
             <template v-for="elem in model.elements" :key="elem.id">
                 <component :is="elemComponentType(elem)" :elem="elem"
+                    :ref="elemAssociate(elem)"
                     @action="elemAction(elem, $event)"/>
             </template>
         </svg>
@@ -32,7 +33,7 @@ svg .drag-move > line.hover {
 </style>
 
 <script lang="ts">
-import { toRaw } from 'vue';
+import { ComponentPublicInstance, toRaw, VNodeRef } from 'vue';
 import { Vue, Component, Ref, toNative } from 'vue-facing-decorator';
 
 import WhiteboardContextMenu,
@@ -76,6 +77,8 @@ class IWhiteboardApp extends Vue {
     sketch: SketchEditor
     sketchSync = new Map<M.Element, ShapeComponent>()
 
+    uiMap: Map<M.Id, ComponentPublicInstance> = new Map()
+
     mounted() {
         this.sketch = new SketchEditor(this.svg);
     }
@@ -104,6 +107,14 @@ class IWhiteboardApp extends Vue {
         return Object.hasOwn(ELEMENT_TYPES, elem.type) ||
                Object.hasOwn(WIDGET_TYPES, elem.type) ? elem.type : 'stub';
     }
+
+
+    elemAssociate(elem: M.Element): VNodeRef {
+        return ($el: ComponentPublicInstance) => {
+            if (this.uiMap) this.uiMap.set(elem.id, $el);
+        };
+    }
+
 
     /** Create a respective SketchVG component, if applicable */
     elemSketch(elem: M.Element & {shape?: Shape2D}): ShapeComponent {

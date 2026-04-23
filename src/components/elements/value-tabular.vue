@@ -28,5 +28,6 @@ class IValueTabular extends Vue {
     }
 }
 
+export { IValueTabular }
 export default toNative(IValueTabular)
 </script>

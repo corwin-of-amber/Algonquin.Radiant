@@ -1,7 +1,7 @@
 <template>
     <obj :elem="elem">
         <div class="element--boxed">
-            <value-tabular :elem="elem"/>
+            <value-tabular ref="tabular" :elem="elem"/>
             <span class="errormsg" v-if="elem.err" v-text="elem.err"></span>
         </div>
     </obj>
@@ -15,11 +15,11 @@ span.errormsg {
 </style>
 
 <script lang="ts">
-import { Component, Vue, Prop, toNative } from 'vue-facing-decorator';
+import { Component, Vue, Prop, Ref, toNative } from 'vue-facing-decorator';
 import { DocumentModel as M } from '../../model';
 import Obj from '../element-obj.vue';
 import ValueDefault from './value-default.vue';
-import ValueTabular from './value-tabular.vue';
+import ValueTabular, { IValueTabular } from './value-tabular.vue';
 
 interface Props {
     value: any
@@ -31,6 +31,7 @@ interface Props {
 })
 class IElementValue extends Vue {
     @Prop elem: M.Element & Props = undefined   
+    @Ref tabular: IValueTabular
 }
 
 export { IElementValue, Props }
